@@ -1,13 +1,14 @@
 {
   "name": "tbay-sms-backend",
   "version": "1.0.0",
-  "description": "TBay SMS Backend",
+  "description": "TBay Backend - SMS + Web Push",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "web-push": "^3.6.6"
   }
 }
