@@ -171,7 +171,60 @@ app.post('/api/place-order', async (req, res) => {
         message: 'Odda imepokelewa. SMS 3 + Web Push 3 zitatumwa.'
     });
 });
+// ============================================
+// TEST ENDPOINT - Tuma notification moja
+// ============================================
+app.post('/api/test-push', async (req, res) => {
+    const { phone } = req.body;
+    
+    if (!phone) {
+        return res.status(400).json({ error: 'Namba inahitajika' });
+    }
 
+    console.log(`🧪 Test notification kwa ${phone}`);
+
+    // Angalia kama subscription ipo
+    const subscription = await redis.get(`sub:${phone}`);
+    
+    if (!subscription) {
+        console.log(`❌ Hakuna subscription kwa ${phone}`);
+        return res.json({ 
+            success: false, 
+            error: 'Hakuna subscription. Fungua website na uweke odda kwanza.',
+            phone: phone
+        });
+    }
+
+    console.log(`✅ Subscription ipo kwa ${phone}`);
+
+    // Tuma notification
+    try {
+        const parsedSub = typeof subscription === 'string' ? JSON.parse(subscription) : subscription;
+
+        await webpush.sendNotification(parsedSub, JSON.stringify({
+            title: '🧪 Test Notification',
+            body: 'Hongera! Mfumo wako wa TBay unafanya kazi!',
+            icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png'
+        }));
+
+        console.log(`✅ Test notification imetumwa kwa ${phone}`);
+        res.json({ 
+            success: true, 
+            message: 'Test notification imetumwa!',
+            phone: phone
+        });
+    } catch (error) {
+        console.error('❌ Kosa la test notification:', error.message);
+        res.json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+// ============================================
+// ANZISHA SERVER
+// ============================================
 // ============================================
 // ANZISHA SERVER
 // ============================================
