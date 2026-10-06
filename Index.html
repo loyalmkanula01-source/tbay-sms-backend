@@ -1,0 +1,3824 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBay - Jenga na Simamia Maduka Yako ya Mtandaoni</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1a1a1a; line-height: 1.6; background: #ffffff;
+    scroll-behavior: smooth; position: relative; padding-top: 70px;
+  }
+  a { text-decoration: none; color: inherit; }
+  ul { list-style: none; }
+  img { max-width: 100%; display: block; }
+
+  :root {
+    --green: #10b981; --green-dark: #059669; --green-light: #d1fae5;
+    --dark: #111827; --gray: #6b7280; --gray-light: #f9fafb;
+    --border: #e5e7eb;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; width: 100%; }
+  .page { display: none; width: 100%; }
+  .page.active { display: block; width: 100%; }
+
+  /* ===== HEADER ===== */
+  header {
+    background: #fff; border-bottom: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    width: 100%; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; width: 100%; }
+  .logo {
+    font-size: 26px; font-weight: 800; color: var(--dark);
+    display: flex; align-items: center; gap: 2px; cursor: pointer; letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--green); }
+  .nav-links { display: none; }
+  .nav-buttons { display: flex; gap: 12px; align-items: center; }
+  .btn {
+    padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;
+    cursor: pointer; border: none; transition: all 0.2s; display: inline-block; font-family: inherit;
+  }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-outline { background: #fff; color: var(--dark); border: 1.5px solid var(--border); }
+  .btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: 60px 0 50px; text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); width: 100%;
+  }
+  .badge {
+    display: inline-block; background: var(--green-light); color: var(--green-dark);
+    padding: 7px 16px; border-radius: 30px; font-size: 12px; font-weight: 600; margin-bottom: 22px;
+  }
+  .hero h1 { font-size: 34px; font-weight: 800; line-height: 1.2; color: var(--dark); max-width: 700px; margin: 0 auto 18px; }
+  .hero p { font-size: 15px; color: var(--gray); max-width: 620px; margin: 0 auto 30px; }
+  .hero-buttons { display: flex; flex-direction: column; gap: 18px; align-items: center; margin-bottom: 45px; }
+
+  .gusa-wrapper-box {
+    display: flex; flex-direction: column; align-items: center; max-width: 420px; width: 100%;
+    background: #ecfdf5; border: 3px solid #10b981; border-radius: 18px; padding: 14px;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15); transition: transform 0.3s;
+  }
+  .gusa-wrapper-box:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(16, 185, 129, 0.25); }
+  .gusa-main-btn {
+    display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff;
+    padding: 18px 22px; border-radius: 12px; font-weight: 800; font-size: 17px;
+    text-align: center; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+    transition: all 0.3s; animation: whatsappPulse 2s ease-in-out infinite; line-height: 1.3;
+  }
+  .gusa-main-btn:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.55); }
+  .gusa-main-btn svg { width: 28px; height: 28px; min-width: 28px; fill: #fff; }
+  @keyframes whatsappPulse {
+    0%, 100% { box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 6px 25px rgba(16, 185, 129, 0.7); }
+  }
+  .gusa-caption-box {
+    display: flex; align-items: flex-start; justify-content: center; gap: 8px;
+    margin-top: 12px; padding: 0 6px; color: #065f46; font-size: 14px;
+    font-weight: 700; text-align: center; line-height: 1.4;
+  }
+  .gusa-caption-box .link-inline {
+    color: #065f46; text-decoration: underline; text-decoration-color: #10b981;
+    text-decoration-thickness: 2px; transition: color 0.2s;
+  }
+  .gusa-caption-box .link-inline:hover { color: #10b981; }
+
+  .btn-animated {
+    position: relative; background: linear-gradient(135deg, #10b981, #059669, #10b981);
+    background-size: 200% 200%; color: #fff; padding: 15px 36px; border-radius: 8px;
+    font-weight: 700; font-size: 15px;
+    animation: gradientMove 3s ease infinite, pulseGlow 2s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); overflow: hidden;
+    display: inline-block; min-width: 200px; cursor: pointer; border: none; font-family: inherit;
+  }
+  .btn-animated::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shine 2.5s infinite;
+  }
+  .btn-animated:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5); }
+  @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 18px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+  @keyframes shine { 0% { left: -100%; } 50% { left: 100%; } 100% { left: 100%; } }
+
+  .hero-img {
+    max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1); padding: 15px; border: 1px solid var(--border);
+  }
+  .hero-img .fake-bar {
+    display: flex; gap: 6px; padding: 8px 10px; background: #f3f4f6; border-radius: 8px 8px 0 0;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ef4444; } .dot.yellow { background: #f59e0b; } .dot.green { background: #10b981; }
+  .dashboard {
+    background: #f9fafb; border-radius: 0 0 8px 8px; padding: 20px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
+  }
+  .dash-card { background: #fff; border-radius: 8px; padding: 14px; border: 1px solid var(--border); text-align: left; }
+  .dash-card h4 { font-size: 11px; color: var(--gray); font-weight: 500; }
+  .dash-card .value { font-size: 18px; font-weight: 700; color: var(--dark); margin-top: 4px; }
+  .dash-card .value.green { color: var(--green); }
+
+  /* ===== STATS ===== */
+  .stats { padding: 60px 0; text-align: center; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 700px; margin: 0 auto; }
+  .stat h3 { font-size: 38px; font-weight: 800; color: var(--green); }
+  .stat p { color: var(--gray); font-size: 14px; }
+
+  /* ===== SECTION TITLES ===== */
+  .section-title { text-align: center; margin-bottom: 50px; }
+  .section-title h2 { font-size: 32px; font-weight: 800; color: var(--dark); margin-bottom: 12px; }
+  .section-title p { color: var(--gray); font-size: 15px; }
+
+  /* ===== PRICING ===== */
+  .pricing { padding: 80px 0; background: var(--gray-light); }
+  .toggle-wrap {
+    display: flex; justify-content: center; align-items: center; gap: 15px;
+    margin-bottom: 45px; font-size: 15px; font-weight: 600; color: var(--gray);
+  }
+  .toggle { width: 50px; height: 26px; background: var(--border); border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+    background: #fff; border-radius: 50%; transition: 0.3s;
+  }
+  .toggle.active { background: var(--green); }
+  .toggle.active::after { left: 27px; }
+  .toggle-label.active { color: var(--green); }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+  .price-card {
+    background: #fff; border-radius: 16px; padding: 35px 28px;
+    border: 1.5px solid var(--border); transition: all 0.3s;
+  }
+  .price-card:hover {
+    border-color: var(--green); box-shadow: 0 15px 40px rgba(16,185,129,0.15); transform: translateY(-5px);
+  }
+  .price-card h3 { font-size: 22px; color: var(--dark); margin-bottom: 8px; }
+  .price-card .price { font-size: 32px; font-weight: 800; color: var(--dark); margin: 10px 0; }
+  .price-card .price small { font-size: 14px; font-weight: 400; color: var(--gray); }
+  .price-card .desc { color: var(--gray); font-size: 14px; margin-bottom: 25px; min-height: 40px; }
+  .price-card .divider { height: 1px; background: var(--border); margin: 20px 0; position: relative; }
+  .price-card .divider::after {
+    content: '✓'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: #fff; color: var(--green); padding: 0 8px; font-size: 14px; font-weight: 700;
+  }
+  .usage-title { font-size: 12px; font-weight: 700; color: var(--gray); letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
+  .usage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+  .usage-item { text-align: center; }
+  .usage-item .num { font-size: 22px; font-weight: 800; color: var(--green); }
+  .usage-item .label { font-size: 12px; color: var(--gray); }
+  .features-title { font-size: 12px; font-weight: 700; color: var(--gray); letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
+  .feature-list li {
+    font-size: 14px; color: #374151; margin-bottom: 10px; padding-left: 22px; position: relative;
+  }
+  .feature-list li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .price-card .btn { width: 100%; margin-top: 25px; padding: 13px; }
+
+  /* ===== WHY ===== */
+  .why { padding: 80px 0; }
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+  .why-item { display: flex; gap: 18px; margin-bottom: 30px; }
+  .why-icon {
+    width: 48px; height: 48px; min-width: 48px; background: var(--green-light);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    color: var(--green-dark); font-size: 22px;
+  }
+  .why-item h4 { font-size: 18px; color: var(--dark); margin-bottom: 6px; }
+  .why-item p { font-size: 14px; color: var(--gray); }
+
+  .trust-card { background: var(--gray-light); border-radius: 16px; padding: 35px; text-align: center; }
+  .trust-card h3 { font-size: 22px; margin-bottom: 8px; }
+  .trust-card > p { color: var(--gray); font-size: 14px; margin-bottom: 25px; }
+  .trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  .trust-item { background: #fff; border-radius: 10px; padding: 20px; border: 1px solid var(--border); }
+  .trust-item .num { font-size: 24px; font-weight: 800; }
+  .trust-item .num.blue { color: #3b82f6; }
+  .trust-item .num.green { color: var(--green); }
+  .trust-item .num.orange { color: #f59e0b; }
+  .trust-item .num.purple { color: #8b5cf6; }
+  .trust-item .label { font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+  /* ===== ABOUT ===== */
+  .about { padding: 80px 0; background: var(--gray-light); }
+  .about p { color: #374151; font-size: 15px; margin-bottom: 18px; max-width: 850px; margin-left: auto; margin-right: auto; }
+  .about-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px; max-width: 900px; margin: 45px auto 0; text-align: center;
+  }
+  .about-stat .num { font-size: 26px; font-weight: 800; color: var(--dark); }
+  .about-stat .label { font-size: 13px; color: var(--gray); }
+
+  /* ===== TEAM ===== */
+  .team { padding: 80px 0; text-align: center; }
+  .team-card {
+    max-width: 420px; margin: 0 auto; background: #fff; border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px 30px;
+  }
+  .avatar {
+    width: 90px; height: 90px; border-radius: 50%; background: var(--green); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    font-weight: 800; margin: 0 auto 20px;
+  }
+  .team-card h3 { font-size: 20px; margin-bottom: 5px; }
+  .team-card .role { color: var(--gray); font-size: 14px; margin-bottom: 15px; }
+  .team-card .bio { font-size: 14px; color: var(--gray); margin-bottom: 20px; }
+  .socials { display: flex; gap: 12px; justify-content: center; }
+  .socials a {
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; color: var(--gray); transition: all 0.2s;
+  }
+  .socials a:hover { background: var(--green); color: #fff; border-color: var(--green); }
+
+  /* ===== JOIN ===== */
+  .join { padding: 0 0 80px; text-align: center; }
+  .join-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    padding: 50px 30px; max-width: 700px; margin: 0 auto;
+  }
+  .join-card h2 { font-size: 30px; margin-bottom: 18px; }
+  .join-card p { color: var(--gray); margin-bottom: 28px; font-size: 15px; }
+
+  /* ===== CONTACT ===== */
+  .contact { padding: 80px 0; background: var(--gray-light); }
+  .contact-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; }
+  .contact-form { background: #fff; padding: 35px; border-radius: 16px; border: 1px solid var(--border); }
+  .contact-form h3 { margin-bottom: 25px; font-size: 22px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--dark); }
+  .form-group input, .form-group textarea {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 14px; font-family: inherit; transition: border 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--green); }
+  .form-group textarea { resize: vertical; min-height: 110px; }
+  .contact-info h3 { margin-bottom: 20px; font-size: 22px; }
+  .contact-info > p { color: var(--gray); margin-bottom: 30px; font-size: 15px; }
+  .info-item { display: flex; gap: 15px; align-items: center; margin-bottom: 22px; }
+  .info-icon {
+    width: 44px; height: 44px; min-width: 44px; background: var(--green-light);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    color: var(--green-dark); font-size: 18px;
+  }
+  .info-item h4 { font-size: 15px; margin-bottom: 2px; }
+  .info-item p { font-size: 14px; color: var(--gray); }
+
+  /* ===== FOOTER ===== */
+  footer { background: var(--dark); color: #d1d5db; padding: 60px 0 25px; }
+  .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 35px; margin-bottom: 45px; }
+  .footer-logo {
+    font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 15px;
+    display: flex; align-items: center; gap: 2px; letter-spacing: -0.5px;
+  }
+  .footer-logo span { color: var(--green); }
+  .footer-about p { font-size: 14px; color: #9ca3af; margin-bottom: 20px; line-height: 1.7; }
+  .footer-contact-item { display: flex; gap: 10px; align-items: center; font-size: 14px; color: #9ca3af; margin-bottom: 12px; }
+  .footer-col h4 { color: #fff; font-size: 15px; margin-bottom: 18px; font-weight: 700; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul a { font-size: 14px; color: #9ca3af; transition: color 0.2s; }
+  .footer-col ul a:hover { color: var(--green); }
+
+  .newsletter { text-align: center; border-top: 1px solid #1f2937; padding-top: 35px; margin-bottom: 25px; }
+  .newsletter h4 { color: #fff; font-size: 18px; margin-bottom: 8px; }
+  .newsletter p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; }
+  .newsletter-form { display: flex; gap: 10px; max-width: 480px; margin: 0 auto; }
+  .newsletter-form input {
+    flex: 1; padding: 12px 16px; border-radius: 8px; border: 1px solid #374151;
+    background: #1f2937; color: #fff; font-size: 14px;
+  }
+  .newsletter-form input:focus { outline: none; border-color: var(--green); }
+
+  .footer-bottom { text-align: center; border-top: 1px solid #1f2937; padding-top: 22px; font-size: 13px; color: #6b7280; }
+  .footer-socials { display: flex; gap: 15px; justify-content: center; margin-top: 12px; }
+  .footer-socials a { color: #9ca3af; font-size: 16px; transition: color 0.2s; }
+  .footer-socials a:hover { color: var(--green); }
+
+  /* ===== SCROLL HINT ===== */
+  .scroll-hint {
+    position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: #fff; width: 45px; height: 45px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    cursor: pointer; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+    opacity: 0; transition: opacity 0.6s ease; z-index: 99; animation: bounceDown 1.5s infinite;
+  }
+  .scroll-hint.show { opacity: 1; }
+  @keyframes bounceDown {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ===== SIGNUP PAGE ===== */
+  .signup-page {
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 60%, #d1fae5 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 20px; color: var(--dark); width: 100%;
+  }
+  .signup-container {
+    width: 100%; max-width: 460px; background: #ffffff;
+    border: 1.5px solid var(--green-light); border-radius: 24px;
+    padding: 35px 28px 30px;
+    box-shadow: 0 20px 50px rgba(16, 185, 129, 0.15), 0 4px 12px rgba(0, 0, 0, 0.05);
+    animation: fadeInUp 0.6s ease; position: relative; overflow: hidden;
+  }
+  .signup-container::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #10b981, #059669, #10b981);
+    background-size: 200% 100%; animation: gradientMove 3s ease infinite;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .signup-logo-box { display: flex; align-items: center; justify-content: center; margin-bottom: 22px; }
+  .signup-logo-text {
+    font-size: 30px; font-weight: 800; color: var(--dark);
+    display: flex; align-items: center; gap: 2px; letter-spacing: -0.5px;
+  }
+  .signup-logo-text span { color: var(--green); }
+  .signup-title {
+    text-align: center; font-size: 26px; font-weight: 800;
+    color: var(--dark); margin-bottom: 10px; letter-spacing: -0.5px;
+  }
+  .signup-subtitle {
+    text-align: center; font-size: 14.5px; color: var(--gray);
+    line-height: 1.55; margin-bottom: 28px; padding: 0 8px;
+  }
+  .signup-form-group { margin-bottom: 20px; }
+  .signup-form-group label { display: block; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+  .signup-form-group input {
+    width: 100%; padding: 16px 18px; border-radius: 14px;
+    border: 1.5px solid var(--border); background: #f9fafb;
+    color: var(--dark); font-size: 15px; font-family: inherit; transition: all 0.2s;
+  }
+  .signup-form-group input::placeholder { color: #9ca3af; }
+  .signup-form-group input:focus {
+    outline: none; border-color: var(--green); background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+  }
+  .btn-submit {
+    width: 100%; padding: 18px; margin-top: 6px; border-radius: 14px; border: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff;
+    font-size: 16px; font-weight: 800; letter-spacing: 1.5px; cursor: pointer;
+    transition: all 0.3s; box-shadow: 0 8px 22px rgba(16, 185, 129, 0.4);
+    text-transform: uppercase; position: relative; overflow: hidden; font-family: inherit;
+  }
+  .btn-submit::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: shine 2.5s infinite;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16, 185, 129, 0.55); }
+  .btn-submit:active { transform: translateY(0); }
+  .signup-footer-note { text-align: center; margin-top: 22px; font-size: 13.5px; color: var(--gray); }
+  .signup-footer-note a { color: var(--green-dark); text-decoration: none; font-weight: 700; cursor: pointer; }
+  .signup-footer-note a:hover { text-decoration: underline; }
+  .back-link {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 16px; font-size: 13px; color: var(--gray); text-decoration: none;
+    transition: color 0.2s; cursor: pointer; background: none; border: none;
+    font-family: inherit; width: 100%;
+  }
+  .back-link:hover { color: var(--green-dark); }
+
+  /* ===== VARIABLES ===== */
+  :root {
+    --sidebar-bg: #111827; --sidebar-hover: #1f2937;
+    --blue: #3b82f6; --yellow: #fbbf24;
+  }
+
+  /* ===== WELCOME MODAL ===== */
+  .welcome-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.8); z-index: 9999; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(10px); overflow-y: auto;
+  }
+  .welcome-modal-overlay.show { display: flex; animation: fadeIn 0.4s ease; }
+  .welcome-modal { max-width: 440px; width: 100%; margin: auto; animation: welcomePop 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+  @keyframes welcomePop {
+    0% { transform: scale(0.7) translateY(40px); opacity: 0; }
+    70% { transform: scale(1.03) translateY(-5px); }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .welcome-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 50%, #e0e7ff 100%);
+    border: 2px solid transparent; background-clip: padding-box; border-radius: 28px;
+    padding: 38px 28px 34px; text-align: center; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 25px 60px rgba(79, 70, 229, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.15) inset;
+  }
+  .welcome-card::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.25), transparent 70%);
+    border-radius: 50%; animation: floatGlow 6s ease-in-out infinite;
+  }
+  .welcome-card::after {
+    content: ''; position: absolute; bottom: -70px; left: -70px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
+    border-radius: 50%; animation: floatGlow 6s ease-in-out infinite reverse;
+  }
+  @keyframes floatGlow {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    50% { transform: translate(-10px, 10px) scale(1.15); opacity: 1; }
+  }
+  .welcome-card-icon {
+    font-size: 52px; margin-bottom: 16px; display: inline-block;
+    position: relative; z-index: 1; animation: iconFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 8px 20px rgba(99, 102, 241, 0.4));
+  }
+  @keyframes iconFloat {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+  }
+  .welcome-card-title {
+    font-size: 28px; font-weight: 900;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #2563eb 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 14px; line-height: 1.25;
+    letter-spacing: -0.5px; position: relative; z-index: 1;
+  }
+  .welcome-card-desc {
+    font-size: 16px; color: #4b5563; line-height: 1.6;
+    margin-bottom: 26px; font-weight: 500; position: relative; z-index: 1; padding: 0 4px;
+  }
+  .welcome-install-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 30%, #7c3aed 70%, #8b5cf6 100%);
+    background-size: 250% 250%; color: #ffffff; border: none;
+    padding: 20px 24px; border-radius: 50px; font-size: 18px; font-weight: 900;
+    letter-spacing: 0.8px; cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.4s;
+    font-family: inherit; position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.55), 0 0 25px rgba(139, 92, 246, 0.35);
+    animation: installGradient 4s ease infinite;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); overflow: hidden;
+  }
+  .welcome-install-btn::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shineEffect 4s infinite;
+  }
+  @keyframes shineEffect { 0% { left: -100%; } 50% { left: 100%; } 100% { left: 100%; } }
+  @keyframes installGradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .welcome-install-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 18px 45px rgba(79, 70, 229, 0.85), 0 0 40px rgba(139, 92, 246, 0.6); }
+  .welcome-install-btn:active { transform: translateY(-1px) scale(0.98); }
+  .welcome-install-btn .install-icon { font-size: 24px; line-height: 1; display: inline-block; animation: iconBounce 2s ease-in-out infinite; }
+  @keyframes iconBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+  .welcome-channel-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 50%, #dcfce7 100%);
+    border: 2px solid transparent; background-clip: padding-box; border-radius: 28px;
+    padding: 30px 24px 26px; text-align: center; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 25px 60px rgba(37, 211, 102, 0.35), 0 0 0 1px rgba(37, 211, 102, 0.15) inset;
+  }
+  .welcome-channel-card::before {
+    content: ''; position: absolute; top: -70px; left: -70px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(37, 211, 102, 0.25), transparent 70%);
+    border-radius: 50%; animation: floatGlow 6s ease-in-out infinite;
+  }
+  .welcome-channel-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 50%, #075E54 100%);
+    background-size: 250% 250%; color: #ffffff; border: none;
+    padding: 20px 24px; border-radius: 50px; font-size: 18px; font-weight: 900;
+    letter-spacing: 0.8px; cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.4s;
+    font-family: inherit; position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 12px 30px rgba(37, 211, 102, 0.55), 0 0 25px rgba(37, 211, 102, 0.35);
+    animation: channelGradient 4s ease infinite;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); overflow: hidden;
+  }
+  .welcome-channel-btn::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shineEffect 4s infinite 0.8s;
+  }
+  @keyframes channelGradient { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .welcome-channel-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 18px 45px rgba(37, 211, 102, 0.85), 0 0 40px rgba(37, 211, 102, 0.6); }
+  .welcome-channel-btn:active { transform: translateY(-1px) scale(0.98); }
+  .welcome-channel-btn .wa-icon { font-size: 24px; line-height: 1; display: inline-block; animation: iconBounce 2s ease-in-out infinite 0.3s; }
+  .welcome-channel-desc { font-size: 14.5px; color: #065f46; line-height: 1.6; font-weight: 600; position: relative; z-index: 1; padding: 0 4px; }
+  .welcome-channel-desc strong { color: #047857; font-weight: 900; }
+
+  .welcome-skip-btn {
+    background: rgba(255,255,255,0.15); color: #e5e7eb;
+    border: 2px solid rgba(255,255,255,0.25); padding: 14px 32px; border-radius: 50px;
+    font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: all 0.3s; margin: 0 auto; display: block; backdrop-filter: blur(10px);
+  }
+  .welcome-skip-btn:hover { background: rgba(255,255,255,0.25); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+
+  /* ===== AUTH PAGES ===== */
+  .auth-page {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #ffffff; z-index: 5000; display: none;
+    overflow-y: auto; padding: 20px 16px 40px; width: 100%;
+  }
+  .auth-page.show { display: block; }
+  .auth-back-btn {
+    background: none; border: none; font-size: 26px; cursor: pointer;
+    color: var(--dark); padding: 4px 8px; margin-bottom: 20px;
+    border-radius: 8px; transition: background 0.2s;
+  }
+  .auth-back-btn:hover { background: #f3f4f6; }
+  .auth-logo-container { text-align: center; margin-bottom: 20px; }
+  .auth-logo {
+    font-size: 30px; font-weight: 800; color: var(--dark);
+    letter-spacing: -0.5px; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .auth-logo .green { color: var(--green-dark); }
+  .auth-tagline {
+    font-size: 11px; color: var(--gray); letter-spacing: 2px;
+    font-weight: 600; margin-top: 4px; text-transform: uppercase;
+  }
+  .auth-card {
+    background: #ffffff; border-radius: 20px; padding: 28px 22px;
+    max-width: 440px; width: 100%; margin: 0 auto;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06); border: 1px solid #f0f0f0;
+  }
+  .auth-title {
+    text-align: center; font-size: 26px; font-weight: 800;
+    color: var(--dark); margin-bottom: 8px; letter-spacing: -0.5px;
+  }
+  .auth-title-underline {
+    width: 60px; height: 4px; background: var(--green-dark);
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .auth-subtitle {
+    text-align: center; font-size: 14px; color: var(--gray);
+    margin-bottom: 28px; font-weight: 500;
+  }
+  .auth-input-group { margin-bottom: 18px; }
+  .auth-input-label { display: block; font-size: 14.5px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+  .auth-input-label .required { color: #ef4444; margin-left: 2px; }
+  .auth-input {
+    width: 100%; padding: 14px 16px; border-radius: 10px;
+    border: 1.5px solid #d1d5db; background: #ffffff; color: var(--dark);
+    font-size: 15px; font-family: inherit; font-weight: 500; outline: none; transition: all 0.3s;
+  }
+  .auth-input::placeholder { color: #9ca3af; font-weight: 400; }
+  .auth-input:focus { border-color: var(--green-dark); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+  .auth-input.error { border-color: #ef4444; background: #fef2f2; animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+  .auth-error-msg { font-size: 12.5px; color: #ef4444; font-weight: 600; margin-top: 6px; display: none; }
+  .auth-error-msg.show { display: block; }
+  .phone-input-wrapper {
+    display: flex; border-radius: 10px; border: 1.5px solid #d1d5db;
+    overflow: hidden; transition: all 0.3s; background: #ffffff;
+  }
+  .phone-input-wrapper:focus-within { border-color: var(--green-dark); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+  .phone-input-wrapper.error { border-color: #ef4444; background: #fef2f2; }
+  .phone-country {
+    display: flex; align-items: center; gap: 6px; padding: 0 12px;
+    border-right: 1.5px solid #e5e7eb; background: #f9fafb;
+    font-size: 15px; font-weight: 700; color: var(--dark); flex-shrink: 0;
+  }
+  .phone-flag { font-size: 18px; line-height: 1; }
+  .phone-input-field {
+    flex: 1; padding: 14px 16px; border: none; outline: none;
+    font-size: 15px; font-family: inherit; font-weight: 500;
+    background: transparent; color: var(--dark);
+  }
+  .phone-input-field::placeholder { color: #9ca3af; font-weight: 400; }
+  .auth-checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0 8px; }
+  .auth-checkbox { width: 20px; height: 20px; accent-color: var(--green-dark); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+  .auth-checkbox-label { font-size: 14px; color: var(--dark); font-weight: 500; cursor: pointer; line-height: 1.4; }
+  .auth-checkbox-label a { color: var(--green-dark); font-weight: 800; text-decoration: none; }
+  .auth-checkbox-label a:hover { text-decoration: underline; }
+  .auth-btn {
+    width: 100%; background: var(--green-dark); color: #ffffff; border: none;
+    padding: 16px; border-radius: 10px; font-size: 16px; font-weight: 700;
+    letter-spacing: 0.3px; cursor: pointer; transition: all 0.3s;
+    font-family: inherit; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); margin-top: 8px;
+  }
+  .auth-btn:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+  .auth-forgot-link { text-align: right; font-size: 13.5px; font-weight: 700; color: var(--green-dark); margin-top: -8px; margin-bottom: 16px; cursor: pointer; }
+  .auth-forgot-link:hover { text-decoration: underline; }
+  .auth-switch { text-align: center; font-size: 14px; color: var(--dark); margin-top: 20px; font-weight: 500; }
+  .auth-switch a { color: var(--green-dark); font-weight: 800; text-decoration: none; cursor: pointer; margin-left: 4px; }
+  .auth-switch a:hover { text-decoration: underline; }
+
+  /* ===== PAYMENT PAGE ===== */
+  .payment-page {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #f3f4f6; z-index: 4000; display: none;
+    overflow-y: auto; padding-bottom: 30px; width: 100%;
+  }
+  .payment-page.show { display: block; }
+  .payment-header {
+    background: #0f172a; color: #fff; padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .payment-header-close {
+    background: rgba(255,255,255,0.1); border: none; color: #fff;
+    font-size: 18px; width: 34px; height: 34px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .payment-header-title { font-size: 17px; font-weight: 800; }
+  .payment-body { padding: 20px; max-width: 500px; margin: 0 auto; }
+  .payment-company { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .payment-company-logo {
+    width: 36px; height: 36px; background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 16px;
+  }
+  .payment-company-name { font-size: 20px; font-weight: 800; color: var(--green-dark); }
+  .payment-title { font-size: 22px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+  .payment-desc { font-size: 14px; color: var(--gray); margin-bottom: 20px; line-height: 1.6; }
+  .payment-amount-box {
+    background: #ffffff; border-radius: 14px; padding: 16px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; border: 1px solid var(--border);
+  }
+  .payment-amount-label { font-size: 14px; color: var(--gray); font-weight: 600; }
+  .payment-amount-value { font-size: 22px; font-weight: 800; color: var(--green-dark); }
+  .payment-section-label { font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 12px; }
+  .network-card {
+    background: #ffffff; border-radius: 14px; margin-bottom: 12px;
+    overflow: hidden; border: 2px solid transparent; transition: all 0.3s;
+  }
+  .network-card.active { border-color: var(--green); box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15); }
+  .network-header { display: flex; align-items: center; gap: 12px; padding: 16px; cursor: pointer; user-select: none; }
+  .network-logo {
+    width: 42px; height: 42px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 11px;
+    font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .network-logo.mpesa { background: #e60000; }
+  .network-logo.mixx { background: #fbbf24; color: #111827; }
+  .network-logo.airtel { background: #dc2626; }
+  .network-logo.halotel { background: #f97316; }
+  .network-info { flex: 1; }
+  .network-name { font-size: 15px; font-weight: 800; color: var(--dark); margin-bottom: 2px; }
+  .network-ussd { font-size: 12.5px; color: var(--gray); font-weight: 500; }
+  .network-arrow { font-size: 14px; color: var(--gray); transition: transform 0.3s; }
+  .network-card.active .network-arrow { transform: rotate(180deg); color: var(--green-dark); }
+  .network-steps { padding: 0 16px 16px; display: none; }
+  .network-card.active .network-steps { display: block; }
+  .step-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid #f3f4f6; }
+  .step-number {
+    width: 28px; height: 28px; border-radius: 50%; background: #d1fae5;
+    color: #059669; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .step-text { font-size: 14px; color: var(--dark); font-weight: 500; line-height: 1.5; padding-top: 3px; }
+  .step-text strong { font-weight: 800; }
+  .step-highlight {
+    background: #fef3c7; border-radius: 10px; padding: 12px;
+    margin: 8px 0; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .step-highlight .step-number { background: #fbbf24; color: #111827; }
+  .step-highlight-content { flex: 1; }
+  .step-highlight-text { font-size: 14px; color: #92400e; font-weight: 700; line-height: 1.5; margin-bottom: 6px; }
+  .copy-btn {
+    background: #ffffff; border: 1px solid #d97706; color: #92400e;
+    padding: 4px 12px; border-radius: 20px; font-size: 12px;
+    font-weight: 800; cursor: pointer; font-family: inherit; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: #fef3c7; }
+  .copy-btn.copied { background: #d1fae5; border-color: #059669; color: #059669; }
+  .payment-warning {
+    background: #ffffff; border-radius: 14px; padding: 16px;
+    margin-top: 16px; font-size: 13.5px; color: var(--dark);
+    line-height: 1.6; border-left: 4px solid var(--green);
+  }
+  .payment-warning strong { font-weight: 800; }
+  .payment-confirm-btn {
+    width: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff; border: none; padding: 18px; border-radius: 14px;
+    font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s;
+    font-family: inherit; margin-top: 20px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.4);
+  }
+  .payment-confirm-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(15, 23, 42, 0.6); }
+  .payment-back-btn {
+    width: 100%; background: transparent; color: var(--gray);
+    border: none; padding: 14px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-top: 8px; text-decoration: underline;
+  }
+
+  /* ===== DASHBOARD ===== */
+  .dashboard-layout { display: none; min-height: 100vh; width: 100%; max-width: 100%; overflow-x: hidden; }
+  .sidebar {
+    width: 260px; background: var(--sidebar-bg); color: #fff;
+    padding: 25px 0; position: fixed; top: 0; left: 0; bottom: 0;
+    overflow-y: auto; transition: transform 0.3s; z-index: 2000; padding-top: 100px;
+  }
+  .sidebar-logo {
+    font-size: 24px; font-weight: 800; color: #fff;
+    padding: 0 25px 25px; border-bottom: 1px solid #1f2937;
+    margin-bottom: 20px; display: flex; align-items: center;
+    gap: 2px; letter-spacing: -0.5px;
+  }
+  .sidebar-logo span { color: var(--green); }
+  .sidebar-menu { list-style: none; padding: 0 15px; }
+  .sidebar-menu li { margin-bottom: 5px; }
+  .sidebar-menu a {
+    display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+    color: #9ca3af; text-decoration: none; border-radius: 10px;
+    font-size: 14.5px; font-weight: 500; transition: all 0.2s; cursor: pointer;
+  }
+  .sidebar-menu a:hover { background: var(--sidebar-hover); color: #fff; }
+  .sidebar-menu a.active {
+    background: var(--green); color: #fff; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+  .sidebar-menu a .icon { width: 20px; text-align: center; font-size: 16px; }
+  .sidebar-footer { padding: 20px 25px 0; margin-top: 20px; border-top: 1px solid #1f2937; }
+  .sidebar-footer button {
+    width: 100%; background: #dc2626; color: #fff; border: none;
+    padding: 12px; border-radius: 10px; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: background 0.2s; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .sidebar-footer button:hover { background: #b91c1c; }
+  .main-content {
+    flex: 1; margin-left: 0; padding: 110px 20px 25px;
+    transition: margin 0.3s; width: 100%;
+  }
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: #f3f4f6; padding: 20px 0 15px;
+    margin-bottom: 10px; width: 100%; z-index: 100;
+  }
+  .topbar-inner {
+    background: #fff; border-radius: 16px; padding: 18px 25px;
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    max-width: 1100px; margin: 0 auto; width: 100%;
+  }
+  .menu-toggle-dash {
+    display: block; background: none; border: none;
+    font-size: 24px; cursor: pointer; color: var(--dark);
+    margin-right: 12px; padding: 4px;
+  }
+  .menu-toggle-dash:hover { background: #f3f4f6; border-radius: 8px; }
+  .topbar-title h1 { font-size: 22px; font-weight: 800; color: var(--dark); }
+  .topbar-title p { font-size: 13.5px; color: var(--gray); margin-top: 2px; }
+  .topbar-orders-count {
+    font-size: 12px; color: #059669; font-weight: 800; margin-top: 4px;
+    background: #d1fae5; padding: 4px 12px; border-radius: 20px; display: inline-block;
+  }
+  .topbar-user { display: flex; align-items: center; gap: 12px; }
+  .user-info { text-align: right; }
+  .user-info .name { font-size: 14.5px; font-weight: 700; color: var(--dark); }
+  .user-info .role { font-size: 12px; color: var(--gray); }
+  .user-avatar {
+    width: 45px; height: 45px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+
+  .wallet-section { margin-bottom: 25px; position: relative; width: 100%; }
+  .wallet-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    margin-bottom: 15px; align-items: stretch; width: 100%;
+  }
+  .wallet-card {
+    border-radius: 18px; padding: 22px 20px; color: #fff;
+    position: relative; min-height: 220px; display: flex;
+    flex-direction: column; transition: all 0.3s;
+  }
+  .wallet-card:hover { transform: translateY(-4px); }
+  .wallet-card.green-bg {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+  }
+  .wallet-card.red-bg {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.35);
+  }
+  .wallet-card.highlight { animation: highlightPulse 1.5s ease-in-out 3; }
+  @keyframes highlightPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 10px 25px rgba(220, 38, 38, 0.35); }
+    50% { transform: scale(1.08); box-shadow: 0 15px 50px rgba(220, 38, 38, 0.85); }
+  }
+  .wallet-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+  .wallet-card-label { font-size: 13px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; opacity: 0.95; }
+  .wallet-card-icon { font-size: 24px; opacity: 0.95; }
+  .wallet-card-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }
+  .wallet-card-value { font-size: 30px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.8px; line-height: 1.1; }
+  .wallet-card-subtitle { font-size: 13.5px; opacity: 0.9; font-weight: 500; }
+  .wallet-card-spacer { height: 44px; width: 100%; }
+  .withdraw-btn {
+    width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #111827; border: none; padding: 14px; border-radius: 12px;
+    font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.3s;
+    font-family: inherit; margin-top: 0; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+  }
+  .withdraw-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(251, 191, 36, 0.55); }
+  .withdraw-btn.pulse { animation: btnPulse 1.5s infinite; }
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 8px 25px rgba(251, 191, 36, 0.9); transform: scale(1.05); }
+  }
+  .withdraw-history-btn {
+    width: 100%; background: #ffffff; color: #111827; border: 1px solid var(--border);
+    padding: 20px; border-radius: 14px; font-size: 15.5px; font-weight: 700;
+    cursor: pointer; transition: all 0.3s; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); margin-bottom: 15px;
+  }
+  .withdraw-history-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); border-color: var(--green); }
+  .huduma-btn {
+    position: fixed; right: 20px; top: 65%; width: 100px; height: 100px;
+    border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff; border: 4px solid #ffffff; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; font-family: inherit; font-size: 10px; font-weight: 800;
+    letter-spacing: 0.3px; text-align: center; line-height: 1.15; padding: 5px;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5); transition: all 0.3s;
+    z-index: 300; animation: floatHuduma 3s ease-in-out infinite;
+  }
+  .huduma-btn:hover { transform: scale(1.08); box-shadow: 0 12px 35px rgba(16, 185, 129, 0.7); }
+  .huduma-btn .huduma-icon { font-size: 28px; margin-bottom: 2px; }
+  @keyframes floatHuduma { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .promo-card {
+    background: #ffffff; border-radius: 20px; padding: 30px 28px;
+    margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+  }
+  .promo-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, #10b981, #059669, #10b981);
+    background-size: 200% 100%; animation: gradientMove 3s ease infinite;
+  }
+  .promo-card h2 { font-size: 24px; font-weight: 800; color: #111827; margin-bottom: 15px; line-height: 1.35; letter-spacing: -0.3px; }
+  .promo-card p { font-size: 15.5px; color: #4b5563; margin-bottom: 25px; line-height: 1.6; }
+  .fungua-account-btn {
+    width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff; border: none; padding: 18px; border-radius: 14px;
+    font-size: 17px; font-weight: 800; letter-spacing: 1.2px; cursor: pointer;
+    transition: all 0.3s; font-family: inherit; text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  }
+  .fungua-account-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.6); }
+  .orders-section {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    border-radius: 20px; padding: 30px 28px; margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4); position: relative; overflow: hidden;
+  }
+  .orders-section::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.15), transparent);
+    border-radius: 50%;
+  }
+  .orders-label { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #22d3ee; margin-bottom: 12px; position: relative; z-index: 1; }
+  .orders-header-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .orders-title { font-size: 32px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1.2; flex: 1; min-width: 200px; }
+  .orders-count-badge {
+    background: #1e3a5f; color: #ffffff; padding: 14px 24px; border-radius: 14px;
+    font-size: 16px; font-weight: 800; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid #22d3ee33; white-space: nowrap;
+  }
+  .products-section-title {
+    font-size: 20px; font-weight: 800; color: var(--dark); margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  }
+  .live-indicator {
+    display: inline-flex; align-items: center; gap: 6px; background: #d1fae5;
+    color: #059669; padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 800; letter-spacing: 0.5px;
+  }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulseDot 1.5s infinite; }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; margin-bottom: 30px; }
+  .product-card {
+    background: #ffffff; border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s; display: flex; flex-direction: column; cursor: pointer;
+  }
+  .product-card.fade-in { animation: cardFadeIn 0.6s ease; }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .product-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15); border-color: var(--green-light); }
+  .product-card-image { width: 100%; height: 200px; background: #f3f4f6; position: relative; overflow: hidden; }
+  .product-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .product-card:hover .product-card-image img { transform: scale(1.08); }
+  .product-card-badge {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255, 255, 255, 0.95); color: #059669;
+    padding: 5px 12px; border-radius: 20px; font-size: 11px;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); z-index: 2;
+  }
+  .product-card-body { padding: 18px; display: flex; flex-direction: column; flex: 1; }
+  .product-card-rating { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--gray); margin-bottom: 8px; font-weight: 600; }
+  .product-card-rating .star { color: #fbbf24; font-size: 14px; }
+  .product-card-rating .category { color: var(--gray); font-weight: 500; }
+  .product-card-title {
+    font-size: 15px; font-weight: 800; color: var(--dark); margin-bottom: 6px;
+    line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; min-height: 40px;
+  }
+  .product-card-desc {
+    font-size: 12.5px; color: var(--gray); margin-bottom: 14px; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; min-height: 38px;
+  }
+  .product-card-stats {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-top: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6; margin-bottom: 14px;
+  }
+  .product-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: var(--gray); font-weight: 500; flex: 1; }
+  .product-stat .stat-icon { font-size: 15px; color: #9ca3af; margin-bottom: 2px; }
+  .product-stat .stat-value { font-size: 13px; font-weight: 800; color: var(--dark); }
+  .product-card-price { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+  .product-card-price .current { font-size: 20px; font-weight: 800; color: var(--dark); }
+  .product-card-price .old { font-size: 13px; color: #9ca3af; text-decoration: line-through; font-weight: 500; }
+  .product-card-actions { display: flex; gap: 10px; margin-top: auto; }
+  .btn-weka-oda {
+    flex: 1; background: #ffffff; color: var(--dark); border: 1.5px solid var(--border);
+    padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 800;
+    cursor: pointer; transition: all 0.3s; font-family: inherit;
+  }
+  .btn-weka-oda:hover { border-color: var(--green); color: var(--green-dark); transform: translateY(-2px); }
+  .btn-ona-maelezo {
+    flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff; border: none; padding: 12px 14px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+    font-family: inherit; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  .btn-ona-maelezo:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(16, 185, 129, 0.5); }
+  .dash-panel {
+    background: #fff; border-radius: 16px; padding: 25px;
+    border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    margin-bottom: 20px;
+  }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .panel-header h3 { font-size: 18px; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+  .panel-header a { font-size: 13px; color: var(--green-dark); font-weight: 700; text-decoration: none; cursor: pointer; }
+  .panel-header a:hover { text-decoration: underline; }
+  .chart-container { display: flex; align-items: flex-end; justify-content: space-between; height: 220px; gap: 12px; padding-top: 15px; }
+  .chart-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .chart-bar { width: 100%; max-width: 50px; background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-radius: 10px 10px 0 0; transition: all 0.3s; }
+  .chart-bar:hover { opacity: 0.85; transform: scaleY(1.05); }
+  .chart-label { font-size: 12.5px; color: var(--gray); font-weight: 700; }
+  .table-wrapper { overflow-x: auto; }
+  .dash-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .dash-table th {
+    text-align: left; padding: 12px; color: var(--gray); font-weight: 700;
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dash-table td { padding: 16px 12px; border-bottom: 1px solid #f3f4f6; color: var(--dark); font-weight: 500; }
+  .dash-table tr:last-child td { border-bottom: none; }
+  .dash-table tr:hover { background: #f9fafb; }
+  .dash-table td strong { font-weight: 800; }
+  .badge-status {
+    display: inline-block; padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-status.paid { background: #d1fae5; color: #059669; }
+  .badge-status.pending { background: #fed7aa; color: #ea580c; }
+  .badge-status.shipped { background: #dbeafe; color: #2563eb; }
+  .top-product { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid #f3f4f6; }
+  .top-product:last-child { border-bottom: none; }
+  .product-img {
+    width: 55px; height: 55px; border-radius: 12px;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0;
+  }
+  .product-info { flex: 1; }
+  .product-info h4 { font-size: 15.5px; font-weight: 800; color: var(--dark); margin-bottom: 3px; }
+  .product-info p { font-size: 13px; color: var(--gray); }
+  .product-sales { font-size: 16px; font-weight: 800; color: var(--green-dark); }
+  .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1900; }
+  .overlay.show { display: block; }
+
+  /* ===== HUDUMA MODAL ===== */
+  .huduma-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7); z-index: 1600; display: none;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px);
+  }
+  .huduma-modal-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+  .huduma-modal {
+    background: #ffffff; border-radius: 24px; padding: 28px 24px;
+    max-width: 420px; width: 100%; color: #111827;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); position: relative;
+    overflow: hidden; animation: successPop 0.4s ease;
+  }
+  .huduma-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .huduma-modal-title { font-size: 22px; font-weight: 800; color: #111827; }
+  .huduma-modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
+  .huduma-modal-close:hover { background: #f3f4f6; }
+  .huduma-modal-subtitle { font-size: 15px; color: #6b7280; margin-bottom: 20px; font-weight: 500; }
+  .huduma-option {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px; border-radius: 14px; border: none; cursor: pointer;
+    font-family: inherit; font-size: 16px; font-weight: 700;
+    margin-bottom: 12px; transition: all 0.3s; text-align: left;
+  }
+  .huduma-option:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+  .huduma-option .option-icon { font-size: 22px; }
+  .huduma-option.whatsapp { background: #25D366; color: #fff; }
+  .huduma-option.sms { background: #3b82f6; color: #fff; }
+  .huduma-option.channel { background: #22d3ee; color: #0f172a; }
+
+  /* ===== SMS ERROR MODAL ===== */
+  .sms-error-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7); z-index: 1700; display: none;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px);
+  }
+  .sms-error-modal-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+  .sms-error-modal {
+    background: #ffffff; border-radius: 24px; padding: 28px 24px;
+    max-width: 420px; width: 100%; color: #111827;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); position: relative;
+    overflow: hidden; animation: successPop 0.4s ease;
+  }
+  .sms-error-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .sms-error-title { font-size: 22px; font-weight: 800; color: #111827; }
+  .sms-error-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
+  .sms-error-close:hover { background: #f3f4f6; }
+  .sms-error-subtitle { font-size: 15px; color: #6b7280; margin-bottom: 20px; font-weight: 500; }
+  .sms-error-box { background: #fef2f2; border: 2px solid #fecaca; border-radius: 14px; padding: 18px; margin-bottom: 20px; }
+  .sms-error-text { font-size: 15px; color: #dc2626; font-weight: 700; line-height: 1.6; text-align: center; }
+  .sms-error-actions { display: flex; flex-direction: column; gap: 12px; }
+  .sms-error-btn {
+    width: 100%; background: #3b82f6; color: #ffffff; border: none;
+    padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800;
+    cursor: pointer; transition: all 0.3s; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .sms-error-btn:hover { background: #2563eb; transform: translateY(-2px); }
+  .sms-error-btn.secondary { background: #22d3ee; color: #0f172a; }
+  .sms-error-btn.secondary:hover { background: #06b6d4; }
+
+  /* ===== PRODUCT DETAIL PAGE ===== */
+  .detail-page {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #ffffff; z-index: 500; overflow-y: auto;
+    display: none; animation: detailSlideIn 0.35s ease;
+  }
+  .detail-page.show { display: block; }
+  @keyframes detailSlideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .detail-header {
+    position: sticky; top: 0; background: #ffffff; padding: 16px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); z-index: 10;
+  }
+  .detail-brand {
+    display: flex; align-items: center; gap: 10px; font-weight: 800;
+    font-size: 16px; color: var(--dark); letter-spacing: 0.5px;
+  }
+  .detail-brand .brand-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px; font-weight: 800;
+  }
+  .detail-header-actions { display: flex; align-items: center; gap: 16px; }
+  .detail-header-actions .cart-icon { position: relative; font-size: 22px; cursor: pointer; color: var(--dark); }
+  .detail-header-actions .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--dark); }
+  .detail-body { padding-bottom: 100px; }
+  .detail-image-container { width: 100%; height: 380px; background: #f3f4f6; overflow: hidden; position: relative; }
+  .detail-image-container img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-info { padding: 24px 20px; }
+  .detail-category-tag {
+    display: inline-block; background: #f3f4f6; color: var(--dark);
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 12px;
+  }
+  .detail-title { font-size: 28px; font-weight: 800; color: var(--dark); line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .detail-rating-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+    flex-wrap: wrap; font-size: 14px; font-weight: 600; color: var(--gray);
+  }
+  .detail-rating-row .star { color: #fbbf24; }
+  .detail-rating-row .brand-name { color: var(--dark); font-weight: 700; }
+  .detail-rating-row .in-stock {
+    color: #10b981; font-weight: 800; background: #d1fae5;
+    padding: 3px 10px; border-radius: 12px; font-size: 12px;
+  }
+  .detail-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .detail-price-row .current-price { font-size: 36px; font-weight: 800; color: var(--dark); letter-spacing: -1px; }
+  .detail-price-row .old-price { font-size: 18px; color: #9ca3af; text-decoration: line-through; font-weight: 500; }
+  .detail-price-row .discount-badge {
+    background: var(--blue); color: #fff; padding: 6px 14px;
+    border-radius: 20px; font-size: 13px; font-weight: 800;
+  }
+  .detail-desc { font-size: 15px; color: var(--gray); line-height: 1.7; margin-bottom: 28px; }
+  .detail-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    padding: 20px 0; border-top: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6; margin-bottom: 24px; text-align: center;
+  }
+  .detail-stat-item .stat-icon-big { font-size: 22px; margin-bottom: 6px; display: block; }
+  .detail-stat-item .stat-number { font-size: 18px; font-weight: 800; color: var(--dark); margin-bottom: 2px; }
+  .detail-stat-item .stat-label {
+    font-size: 11.5px; color: var(--gray); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .detail-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .detail-btn-weka-oda {
+    flex: 1; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff; border: none; padding: 16px; border-radius: 12px;
+    font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s;
+    font-family: inherit; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  }
+  .detail-btn-weka-oda:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5); }
+  .detail-btn-nunua {
+    flex: 1; background: transparent; color: var(--dark);
+    border: 2px solid var(--border); padding: 14px; border-radius: 12px;
+    font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s; font-family: inherit;
+  }
+  .detail-btn-nunua:hover { border-color: var(--green); color: var(--green-dark); }
+  .detail-btn-heart {
+    width: 52px; height: 52px; border-radius: 12px; background: #fff;
+    border: 2px solid var(--border); font-size: 22px; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .detail-btn-heart:hover { border-color: #ef4444; background: #fef2f2; }
+  .detail-share { display: flex; gap: 16px; margin-bottom: 26px; padding-left: 4px; }
+  .detail-share .share-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray); transition: color 0.2s; }
+  .detail-share .share-btn:hover { color: var(--green-dark); }
+  .detail-info-items {
+    display: flex; flex-direction: column; gap: 14px; padding: 20px 0;
+    border-top: 1px solid #f3f4f6; margin-bottom: 10px;
+  }
+  .detail-info-item { display: flex; align-items: center; gap: 12px; font-size: 14.5px; color: var(--dark); font-weight: 500; }
+  .detail-info-item .info-icon { font-size: 18px; color: var(--gray); width: 22px; text-align: center; }
+  .detail-features { padding: 22px 0; border-top: 1px solid #f3f4f6; }
+  .detail-features h3 { font-size: 18px; font-weight: 800; color: var(--dark); margin-bottom: 16px; }
+  .detail-features ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .detail-features ul li { font-size: 14.5px; color: var(--dark); font-weight: 500; padding-left: 26px; position: relative; }
+  .detail-features ul li::before { content: '✓'; position: absolute; left: 0; color: var(--green-dark); font-weight: 800; font-size: 15px; }
+  .detail-back-btn {
+    background: none; border: none; font-size: 24px; cursor: pointer;
+    color: var(--dark); padding: 4px 8px; border-radius: 8px; transition: background 0.2s;
+  }
+  .detail-back-btn:hover { background: #f3f4f6; }
+
+  /* ===== LOADING PAGE ===== */
+  .loading-page {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #ffffff; z-index: 1000; display: none;
+    align-items: center; justify-content: center;
+    flex-direction: column; padding: 30px; text-align: center;
+  }
+  .loading-page.show { display: flex; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .loading-spinner {
+    width: 90px; height: 90px; border: 6px solid #e5e7eb;
+    border-top: 6px solid var(--green-dark); border-radius: 50%;
+    animation: spin 1s linear infinite; margin-bottom: 40px;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .loading-title { font-size: 26px; font-weight: 800; color: var(--green-dark); margin-bottom: 18px; letter-spacing: -0.3px; }
+  .loading-subtitle { font-size: 16px; color: var(--gray); font-weight: 500; max-width: 380px; line-height: 1.6; }
+
+  /* ===== SUCCESS PAGE ===== */
+  .success-page {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6); z-index: 1000; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    overflow-y: auto; backdrop-filter: blur(4px);
+  }
+  .success-page.show { display: flex; animation: fadeIn 0.3s ease; }
+  .success-card {
+    background: linear-gradient(160deg, #059669 0%, #047857 60%, #065f46 100%);
+    border-radius: 26px; padding: 32px 26px 28px; max-width: 440px; width: 100%;
+    color: #fff; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    animation: successPop 0.5s ease; position: relative; overflow: hidden;
+  }
+  @keyframes successPop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .success-card::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.4), transparent 70%);
+    border-radius: 50%; animation: floatBg 4s ease-in-out infinite;
+  }
+  .success-card::after {
+    content: ''; position: absolute; bottom: -100px; left: -100px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.3), transparent 70%);
+    border-radius: 50%; animation: floatBg 4s ease-in-out infinite reverse;
+  }
+  @keyframes floatBg {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-15px, 10px) scale(1.05); }
+  }
+  .success-header { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; position: relative; z-index: 1; }
+  .success-icon-flower { width: 68px; height: 68px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+  .success-icon-flower::before {
+    content: ''; position: absolute; inset: 0; background: #ffffff; border-radius: 50%;
+    box-shadow:
+      0 -20px 0 -8px rgba(255, 255, 255, 0.5), 20px 0 0 -8px rgba(255, 255, 255, 0.5),
+      0 20px 0 -8px rgba(255, 255, 255, 0.5), -20px 0 0 -8px rgba(255, 255, 255, 0.5),
+      14px 14px 0 -8px rgba(255, 255, 255, 0.5), -14px -14px 0 -8px rgba(255, 255, 255, 0.5),
+      14px -14px 0 -8px rgba(255, 255, 255, 0.5), -14px 14px 0 -8px rgba(255, 255, 255, 0.5);
+    animation: rotatePetals 8s linear infinite;
+  }
+  @keyframes rotatePetals { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .success-icon-flower .check-circle {
+    width: 62px; height: 62px; border-radius: 50%; background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; color: #059669; font-weight: 900;
+    position: relative; z-index: 2; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+  .success-title-box { flex: 1; }
+  .success-title { font-size: 32px; font-weight: 800; line-height: 1.1; letter-spacing: -0.5px; margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+  .success-subtitle { font-size: 16px; opacity: 0.95; font-weight: 500; line-height: 1.3; }
+  .success-divider { height: 1px; background: rgba(255,255,255,0.25); margin: 0 0 22px 0; position: relative; z-index: 1; }
+  .success-amount {
+    text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 24px;
+    letter-spacing: -0.2px; line-height: 1.5; position: relative; z-index: 1;
+    padding: 0 6px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .success-amount .highlight { color: #fbbf24; font-weight: 900; }
+  .success-box {
+    background: rgba(255, 255, 255, 0.15); border-radius: 16px;
+    padding: 16px 18px; display: flex; align-items: flex-start;
+    gap: 14px; margin-bottom: 14px; position: relative; z-index: 1;
+    border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(6px);
+  }
+  .success-box-icon { font-size: 26px; flex-shrink: 0; margin-top: 0; line-height: 1; }
+  .success-box-text { font-size: 16.5px; font-weight: 600; line-height: 1.6; }
+  .success-box-text strong { font-weight: 800; }
+  .success-box.warning { background: rgba(0, 0, 0, 0.22); border: 1px solid rgba(251, 191, 36, 0.4); }
+  .success-box.warning .success-box-icon { color: #fbbf24; }
+  .success-note {
+    background: rgba(251, 191, 36, 0.18); border: 1px solid rgba(251, 191, 36, 0.5);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+    position: relative; z-index: 1; display: flex; align-items: flex-start;
+    gap: 10px; font-size: 14.5px; font-weight: 600; line-height: 1.6; color: #fff;
+  }
+  .success-note-icon { font-size: 20px; flex-shrink: 0; line-height: 1.2; }
+  .success-note strong { font-weight: 800; color: #fbbf24; }
+  .success-withdraw-btn {
+    width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ea580c 100%);
+    color: #ffffff; border: none; padding: 20px; border-radius: 16px;
+    font-size: 19px; font-weight: 900; letter-spacing: 1.5px; cursor: pointer;
+    transition: all 0.3s; font-family: inherit; text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.6); margin-top: 8px;
+    position: relative; z-index: 1; display: flex; align-items: center;
+    justify-content: center; gap: 10px; animation: withdrawPulse 1.8s infinite;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  .success-withdraw-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(245, 158, 11, 0.9); }
+  @keyframes withdrawPulse {
+    0%, 100% { box-shadow: 0 8px 24px rgba(245, 158, 11, 0.6); transform: scale(1); }
+    50% { box-shadow: 0 14px 40px rgba(245, 158, 11, 1); transform: scale(1.03); }
+  }
+
+  /* ===== CONGRATS PAGE ===== */
+  .congrats-page {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7); z-index: 2000; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    overflow-y: auto; backdrop-filter: blur(6px);
+  }
+  .congrats-page.show { display: flex; animation: fadeIn 0.3s ease; }
+  .congrats-card {
+    background: linear-gradient(160deg, #059669 0%, #047857 60%, #065f46 100%);
+    border-radius: 26px; padding: 32px 26px 28px; max-width: 440px; width: 100%;
+    color: #fff; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    animation: congratsPop 0.6s ease; position: relative; overflow: hidden;
+  }
+  @keyframes congratsPop {
+    0% { transform: scale(0.7) rotate(-5deg); opacity: 0; }
+    60% { transform: scale(1.05) rotate(1deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .congrats-card::before {
+    content: ''; position: absolute; top: -100px; right: -100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.5), transparent 70%);
+    border-radius: 50%; animation: floatBg 5s ease-in-out infinite;
+  }
+  .congrats-card::after {
+    content: ''; position: absolute; bottom: -120px; left: -120px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+    border-radius: 50%; animation: floatBg 5s ease-in-out infinite reverse;
+  }
+  .congrats-icon {
+    width: 90px; height: 90px; margin: 0 auto 20px; background: #ffffff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 50px; color: #059669; position: relative; z-index: 2;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); animation: congratsIconPulse 2s ease-in-out infinite;
+  }
+  @keyframes congratsIconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    50% { transform: scale(1.1); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); }
+  }
+  .congrats-title { text-align: center; font-size: 34px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); }
+  .congrats-subtitle { text-align: center; font-size: 15.5px; opacity: 0.95; margin-bottom: 24px; font-weight: 500; line-height: 1.5; position: relative; z-index: 1; }
+  .congrats-info-box {
+    background: rgba(255, 255, 255, 0.18); border-radius: 16px;
+    padding: 18px 20px; margin-bottom: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px); position: relative; z-index: 1;
+  }
+  .congrats-info-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 14.5px; }
+  .congrats-info-row .label { font-weight: 600; opacity: 0.9; }
+  .congrats-info-row .value { font-weight: 800; text-align: right; color: #fbbf24; }
+  .congrats-amount { text-align: center; font-size: 26px; font-weight: 900; margin: 20px 0; letter-spacing: -0.3px; position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); }
+  .congrats-amount .highlight { color: #fbbf24; font-size: 32px; display: block; margin-top: 4px; }
+  .congrats-message {
+    text-align: center; font-size: 15px; font-weight: 600; line-height: 1.6;
+    margin-bottom: 24px; padding: 14px 16px;
+    background: rgba(16, 185, 129, 0.25); border-radius: 14px;
+    border: 1px solid rgba(52, 211, 153, 0.4); position: relative; z-index: 1;
+  }
+  .congrats-btn {
+    width: 100%; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ea580c 100%);
+    color: #ffffff; border: none; padding: 20px; border-radius: 16px;
+    font-size: 18px; font-weight: 900; letter-spacing: 1.2px; cursor: pointer;
+    transition: all 0.3s; font-family: inherit; text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.6);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    position: relative; z-index: 1; animation: withdrawPulse 1.8s infinite;
+  }
+  .congrats-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(245, 158, 11, 0.9); }
+
+  /* ===== PHONE MODAL ===== */
+  .phone-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7); z-index: 1500; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(6px); animation: fadeIn 0.3s ease;
+  }
+  .phone-modal-overlay.show { display: flex; }
+  .phone-modal {
+    background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 24px; padding: 32px 26px; max-width: 420px; width: 100%;
+    color: #fff; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    position: relative; overflow: hidden; border: 2px solid rgba(16, 185, 129, 0.3);
+    animation: successPop 0.4s ease;
+  }
+  .phone-modal::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.25), transparent 70%);
+    border-radius: 50%;
+  }
+  .phone-modal-header { text-align: center; position: relative; z-index: 1; margin-bottom: 24px; }
+  .phone-modal-icon {
+    width: 80px; height: 80px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 42px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  }
+  .phone-modal-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; color: #ffffff; letter-spacing: -0.3px; line-height: 1.3; }
+  .phone-modal-subtitle { font-size: 14.5px; color: #94a3b8; line-height: 1.5; }
+  .phone-input-group { position: relative; z-index: 1; margin-bottom: 20px; }
+  .phone-input-label { display: block; font-size: 13px; font-weight: 700; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .phone-input {
+    width: 100%; padding: 16px 18px; border-radius: 14px;
+    border: 2px solid rgba(148, 163, 184, 0.25);
+    background: rgba(255, 255, 255, 0.06); color: #ffffff;
+    font-size: 17px; font-family: inherit; font-weight: 600;
+    outline: none; transition: all 0.3s; letter-spacing: 0.5px;
+  }
+  .phone-input::placeholder { color: #64748b; font-weight: 500; }
+  .phone-input:focus { border-color: #10b981; background: rgba(16, 185, 129, 0.08); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+  .phone-input.error { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); animation: shake 0.4s ease; }
+  .phone-error-msg { font-size: 12.5px; color: #ef4444; font-weight: 600; margin-top: 8px; display: none; }
+  .phone-error-msg.show { display: block; }
+  .phone-modal-btn {
+    width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff; border: none; padding: 18px; border-radius: 14px;
+    font-size: 17px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.3s; font-family: inherit; text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+    position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .phone-modal-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(16, 185, 129, 0.7); }
+  .phone-modal-cancel {
+    width: 100%; background: transparent; color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.3); padding: 14px;
+    border-radius: 14px; font-size: 15px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.3s;
+    margin-top: 12px; position: relative; z-index: 1;
+  }
+  .phone-modal-cancel:hover { background: rgba(148, 163, 184, 0.1); color: #cbd5e1; }
+
+  /* ===== WITHDRAWAL MODAL ===== */
+  .withdraw-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7); z-index: 1600; display: none;
+    align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px);
+  }
+  .withdraw-modal-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+  .withdraw-card {
+    background: #ffffff; border-radius: 24px; padding: 28px 24px;
+    max-width: 420px; width: 100%; color: #111827;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    position: relative; overflow: hidden; animation: successPop 0.4s ease;
+  }
+  .withdraw-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .withdraw-card-title { font-size: 22px; font-weight: 800; color: #111827; }
+  .withdraw-card-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
+  .withdraw-card-close:hover { background: #f3f4f6; }
+  .withdraw-input-group { margin-bottom: 20px; }
+  .withdraw-input-label { display: block; font-size: 14px; font-weight: 700; color: #374151; margin-bottom: 10px; text-align: center; }
+  .withdraw-balance-info { text-align: center; font-size: 14px; color: #6b7280; margin-bottom: 20px; font-weight: 600; }
+  .withdraw-balance-info strong { color: #059669; font-size: 18px; }
+  .withdraw-amount-input {
+    width: 100%; padding: 18px 20px; border-radius: 16px;
+    border: 3px solid #2563eb; background: #0f172a; color: #22d3ee;
+    font-size: 32px; font-weight: 800; text-align: center;
+    font-family: inherit; outline: none; letter-spacing: 2px; transition: all 0.3s;
+  }
+  .withdraw-amount-input:focus { border-color: #22d3ee; box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2); }
+  .withdraw-amount-input::placeholder { color: #64748b; font-size: 24px; font-weight: 600; letter-spacing: 1px; }
+  .withdraw-error-msg {
+    color: #dc2626; font-size: 13px; font-weight: 700; text-align: center;
+    margin-top: 12px; display: none; padding: 10px; background: #fef2f2;
+    border-radius: 10px; border: 1px solid #fecaca;
+  }
+  .withdraw-error-msg.show { display: block; }
+  .withdraw-submit-btn {
+    width: 100%; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff; border: none; padding: 18px; border-radius: 14px;
+    font-size: 17px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.3s; font-family: inherit;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.5); margin-top: 8px;
+  }
+  .withdraw-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37, 99, 235, 0.7); }
+  .withdraw-loading { text-align: center; padding: 20px 0; }
+  .withdraw-loading-spinner {
+    width: 70px; height: 70px; border: 6px solid #e5e7eb;
+    border-top: 6px solid #dc2626; border-radius: 50%;
+    animation: spin 1s linear infinite; margin: 0 auto 24px;
+  }
+  .withdraw-loading-title { font-size: 22px; font-weight: 800; color: #dc2626; margin-bottom: 12px; }
+  .withdraw-loading-subtitle { font-size: 15px; color: #6b7280; font-weight: 500; }
+  .withdraw-result-icon { width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .withdraw-result-icon.error { background: #fef2f2; color: #dc2626; }
+  .withdraw-result-title { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 16px; color: #dc2626; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .withdraw-result-text { font-size: 15px; color: #4b5563; text-align: center; line-height: 1.6; margin-bottom: 20px; font-weight: 500; }
+  .withdraw-result-subtext { font-size: 14px; color: #dc2626; text-align: center; line-height: 1.6; margin-bottom: 20px; font-weight: 600; }
+  .withdraw-result-actions { display: flex; flex-direction: column; gap: 12px; }
+  .withdraw-result-btn {
+    width: 100%; background: #22d3ee; color: #0f172a; border: none;
+    padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800;
+    cursor: pointer; transition: all 0.3s; font-family: inherit;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .withdraw-result-btn:hover { background: #06b6d4; transform: translateY(-2px); }
+  .withdraw-result-btn.secondary { background: #0f172a; color: #ffffff; text-transform: none; letter-spacing: 0; }
+  .withdraw-result-btn.secondary:hover { background: #1e293b; }
+
+  /* ===== SMS NOTIFICATION ===== */
+  .sms-notification {
+    position: fixed; top: 20px; left: 50%;
+    transform: translateX(-50%) translateY(-200px);
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #fff; padding: 16px 22px; border-radius: 18px;
+    max-width: 420px; width: calc(100% - 40px);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6); z-index: 3000;
+    display: flex; align-items: flex-start; gap: 14px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    backdrop-filter: blur(10px);
+  }
+  .sms-notification.show { transform: translateX(-50%) translateY(0); }
+  .sms-icon {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+  .sms-content { flex: 1; }
+  .sms-sender { font-size: 13px; font-weight: 800; color: #10b981; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sms-text { font-size: 14px; color: #e2e8f0; line-height: 1.5; font-weight: 500; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  }
+  @media (max-width: 768px) {
+    body { padding-top: 65px; }
+    .welcome-card { padding: 30px 22px 26px; border-radius: 24px; }
+    .welcome-card-title { font-size: 23px; }
+    .welcome-card-desc { font-size: 14.5px; }
+    .welcome-install-btn { font-size: 16px; padding: 18px; }
+    .welcome-install-btn .install-icon { font-size: 22px; }
+    .welcome-channel-card { padding: 24px 20px 22px; border-radius: 24px; }
+    .welcome-channel-btn { font-size: 15px; padding: 18px; }
+    .welcome-channel-btn .wa-icon { font-size: 20px; }
+    .welcome-channel-desc { font-size: 13.5px; }
+    .welcome-skip-btn { padding: 12px 28px; font-size: 14px; }
+    .sidebar { transform: translateX(-100%); padding-top: 90px; }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { padding: 130px 15px 15px; }
+    .topbar { padding: 15px 0 10px; }
+    .topbar-inner { padding: 15px 18px; }
+    .menu-toggle-dash { display: block; }
+    .topbar-title h1 { font-size: 18px; }
+    .user-info { display: none; }
+    .hero h1 { font-size: 26px; }
+    .hero p { font-size: 14px; }
+    .badge { font-size: 11px; padding: 6px 14px; }
+    .contact-grid { grid-template-columns: 1fr; gap: 30px; }
+    .contact-form { padding: 24px 20px; }
+    .contact-info h3 { font-size: 20px; }
+    .info-item { gap: 12px; }
+    .wallet-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wallet-card { min-height: 200px; padding: 16px 14px; border-radius: 14px; }
+    .wallet-card-value { font-size: 22px; }
+    .wallet-card-label { font-size: 10.5px; letter-spacing: 0.8px; }
+    .wallet-card-subtitle { font-size: 11.5px; }
+    .wallet-card-icon { font-size: 18px; }
+    .wallet-card-spacer { height: 40px; }
+    .withdraw-btn { font-size: 12.5px; padding: 11px; }
+    .withdraw-history-btn { padding: 16px; font-size: 14px; }
+    .huduma-btn { width: 80px; height: 80px; right: 15px; top: 60%; font-size: 8.5px; }
+    .huduma-btn .huduma-icon { font-size: 22px; }
+    .promo-card { padding: 22px 20px; }
+    .promo-card h2 { font-size: 18px; }
+    .promo-card p { font-size: 14px; }
+    .fungua-account-btn { font-size: 15px; padding: 16px; }
+    .orders-section { padding: 22px 20px; }
+    .orders-title { font-size: 22px; }
+    .orders-label { font-size: 11px; letter-spacing: 1px; }
+    .orders-count-badge { font-size: 13px; padding: 10px 18px; }
+    .products-grid { grid-template-columns: 1fr; }
+    .products-section-title { font-size: 17px; }
+    .live-indicator { font-size: 11px; padding: 5px 10px; }
+    .dash-panel { padding: 20px; }
+    .panel-header h3 { font-size: 16px; }
+    .chart-container { height: 180px; }
+    .chart-bar { max-width: 35px; }
+    .chart-label { font-size: 11px; }
+    .dash-table { font-size: 13px; }
+    .dash-table th, .dash-table td { padding: 10px 8px; }
+    .badge-status { font-size: 10.5px; padding: 5px 10px; }
+    .top-product { padding: 12px 0; }
+    .product-img { width: 48px; height: 48px; font-size: 22px; }
+    .product-info h4 { font-size: 14px; }
+    .product-sales { font-size: 14px; }
+    .detail-image-container { height: 300px; }
+    .detail-title { font-size: 22px; }
+    .detail-price-row .current-price { font-size: 28px; }
+    .detail-stats { gap: 6px; }
+    .detail-stat-item .stat-number { font-size: 15px; }
+    .detail-btn-weka-oda, .detail-btn-nunua { font-size: 14px; padding: 13px; }
+    .detail-btn-heart { width: 46px; height: 46px; font-size: 18px; }
+    .loading-spinner { width: 70px; height: 70px; border-width: 5px; }
+    .loading-title { font-size: 22px; }
+    .success-card { padding: 26px 20px 24px; border-radius: 22px; }
+    .success-title { font-size: 26px; }
+    .success-icon-flower { width: 56px; height: 56px; }
+    .success-icon-flower .check-circle { width: 52px; height: 52px; font-size: 28px; }
+    .success-amount { font-size: 20px; }
+    .success-withdraw-btn { font-size: 16px; padding: 17px; border-radius: 14px; }
+    .success-note { font-size: 13.5px; padding: 12px 14px; }
+    .congrats-card { padding: 26px 20px 24px; border-radius: 22px; }
+    .congrats-title { font-size: 26px; }
+    .congrats-icon { width: 70px; height: 70px; font-size: 38px; }
+    .congrats-amount { font-size: 22px; }
+    .congrats-amount .highlight { font-size: 26px; }
+    .congrats-btn { font-size: 15px; padding: 17px; border-radius: 14px; }
+    .congrats-info-row { font-size: 13px; }
+    .phone-modal { padding: 26px 20px; border-radius: 20px; }
+    .withdraw-card { padding: 22px 18px; border-radius: 20px; }
+    .withdraw-card-title { font-size: 20px; }
+    .withdraw-amount-input { font-size: 28px; padding: 16px; }
+    .huduma-modal { padding: 22px 18px; border-radius: 20px; }
+    .sms-error-modal { padding: 22px 18px; border-radius: 20px; }
+    .sms-notification { padding: 14px 18px; border-radius: 16px; }
+    .sms-text { font-size: 13px; }
+    .auth-card { padding: 24px 18px; border-radius: 16px; }
+    .auth-logo { font-size: 26px; }
+    .auth-title { font-size: 22px; }
+    .payment-body { padding: 16px; }
+    .payment-title { font-size: 20px; }
+    .network-name { font-size: 14px; }
+    .step-text { font-size: 13px; }
+  }
+  @media (max-width: 400px) {
+    .welcome-card { padding: 26px 18px 22px; }
+    .welcome-card-title { font-size: 20px; }
+    .welcome-install-btn { font-size: 14px; padding: 16px; }
+    .welcome-channel-btn { font-size: 14px; padding: 16px; }
+    .hero h1 { font-size: 22px; }
+    .hero p { font-size: 13px; }
+    .wallet-card-value { font-size: 19px; }
+    .wallet-card-label { font-size: 9.5px; }
+    .withdraw-btn { font-size: 11px; padding: 10px; }
+    .orders-title { font-size: 20px; }
+    .orders-count-badge { font-size: 12px; padding: 9px 14px; }
+    .btn-weka-oda, .btn-ona-maelezo { font-size: 12px; padding: 11px 10px; }
+    .detail-image-container { height: 240px; }
+    .detail-title { font-size: 20px; }
+    .detail-price-row .current-price { font-size: 24px; }
+    .success-title { font-size: 22px; }
+    .success-amount { font-size: 18px; }
+    .congrats-title { font-size: 22px; }
+    .withdraw-result-title { font-size: 16px; }
+    .huduma-btn { width: 70px; height: 70px; right: 10px; font-size: 7.5px; }
+    .huduma-btn .huduma-icon { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     PAGE 1: WEBSITE (NYUMBANI)
+     ============================================ -->
+<div id="homePage" class="page active">
+
+  <header>
+    <div class="container nav">
+      <div class="logo" onclick="showPage('home')">T<span>Bay</span> 🛒</div>
+      <div class="nav-buttons">
+        <button onclick="showPage('signup')" class="btn btn-primary">Jisajili Bure</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="nyumbani">
+    <div class="container">
+      <div class="badge">🎉 Mpya: Dashibodi ya Uchanganuzi wa Maduka Mengi Sasa Inapatikana</div>
+      <h1>Jenga na Simamia Maduka Yako ya Mtandaoni</h1>
+      <p>Jukwaa kamili la SaaS kwa ajili ya kuunda maduka ya e-commerce yasiyo na kikomo. Linafaa kwa dropshipping Tanzania, likiwa na mifumo ya malipo ya kisasa na zana za usimamizi wa hali ya juu.</p>
+
+      <div class="hero-buttons">
+        <div class="gusa-wrapper-box">
+          <a href="#vipengele" class="gusa-main-btn">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 4.5C21 3.67 20.33 3 19.5 3H6.5C4.57 3 3 4.57 3 6.5V19.5C3 20.33 3.67 21 4.5 21H19.5C20.33 21 21 20.33 21 19.5V4.5ZM5 6.5C5 5.67 5.67 5 6.5 5H19V7H6.5C5.67 7 5 6.33 5 5.5V6.5ZM19 19H6.5C5.67 19 5 18.33 5 17.5V8.79C5.31 8.92 5.64 9 6 9H19V19Z"/>
+            </svg>
+            <span>Gusa Hapa</span>
+          </a>
+          <div class="gusa-caption-box">
+            <span>(<a href="#vipengele" class="link-inline">Jifunze namna dropshipping inafanya kazi</a>)</span>
+          </div>
+        </div>
+
+        <button onclick="showPage('signup')" class="btn-animated">Jisajili Bure →</button>
+      </div>
+
+      <div class="hero-img">
+        <div class="fake-bar">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <div class="dashboard">
+          <div class="dash-card"><h4>Jumla ya Mauzo</h4><div class="value green">TSh 2,450,000</div></div>
+          <div class="dash-card"><h4>Oda Mpya</h4><div class="value">128</div></div>
+          <div class="dash-card"><h4>Wateja</h4><div class="value">342</div></div>
+          <div class="dash-card"><h4>Faida</h4><div class="value green">TSh 890,000</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat"><h3>25,000+</h3><p>Maduka Hai</p></div>
+        <div class="stat"><h3>8,500+</h3><p>Wafanyabiashara Wenye Furaha</p></div>
+        <div class="stat"><h3>10+</h3><p>Themes za Maduka</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="bei">
+    <div class="container">
+      <div class="section-title">
+        <h2>Chagua Mpango Wako</h2>
+        <p>Bei ya wazi inayokua pamoja na biashara yako</p>
+      </div>
+
+      <div class="toggle-wrap">
+        <span class="toggle-label active">Kila Mwezi</span>
+        <div class="toggle" onclick="this.classList.toggle('active')"></div>
+        <span class="toggle-label">Kila Mwaka</span>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Mwanzo</h3>
+          <div class="price">TSh 14,000.00 <small>/mwezi</small></div>
+          <p class="desc">Mpango wa msingi kwa biashara ndogo zinazoanza.</p>
+          <div class="divider"></div>
+          <div class="usage-title">Mipaka ya Matumizi</div>
+          <div class="usage-grid">
+            <div class="usage-item"><div class="num">1</div><div class="label">Duka</div></div>
+            <div class="usage-item"><div class="num">24</div><div class="label">Watumiaji/Duka</div></div>
+            <div class="usage-item"><div class="num">15</div><div class="label">Bidhaa/Duka</div></div>
+            <div class="usage-item"><div class="num">5 GB</div><div class="label">Storage</div></div>
+            <div class="usage-item"><div class="num">10</div><div class="label">Themes</div></div>
+          </div>
+          <div class="features-title">Vipengele</div>
+          <ul class="feature-list">
+            <li>Custom Domain</li>
+            <li>Subdomain</li>
+            <li>PWA</li>
+            <li>Custom Pages</li>
+            <li>Blog</li>
+          </ul>
+          <button onclick="showPage('signup')" class="btn btn-outline">Anza Sasa →</button>
+        </div>
+
+        <div class="price-card">
+          <h3>Pro</h3>
+          <div class="price">TSh 39,000.00 <small>/mwezi</small></div>
+          <p class="desc">Inafaa kwa biashara zinazokua na maduka mengi na mahitaji ya hali ya juu.</p>
+          <div class="divider"></div>
+          <div class="usage-title">Mipaka ya Matumizi</div>
+          <div class="usage-grid">
+            <div class="usage-item"><div class="num">3</div><div class="label">Maduka</div></div>
+            <div class="usage-item"><div class="num">1000</div><div class="label">Watumiaji/Duka</div></div>
+            <div class="usage-item"><div class="num">298</div><div class="label">Bidhaa/Duka</div></div>
+            <div class="usage-item"><div class="num">100 GB</div><div class="label">Storage</div></div>
+            <div class="usage-item"><div class="num">10</div><div class="label">Themes</div></div>
+          </div>
+          <div class="features-title">Vipengele</div>
+          <ul class="feature-list">
+            <li>Custom Domain</li>
+            <li>Subdomain</li>
+            <li>PWA</li>
+            <li>Custom Pages</li>
+            <li>Blog</li>
+            <li>Shipping Method</li>
+          </ul>
+          <button onclick="showPage('signup')" class="btn btn-primary">Anza Sasa →</button>
+        </div>
+
+        <div class="price-card">
+          <h3>Enterprise</h3>
+          <div class="price">TSh 69,000.00 <small>/mwezi</small></div>
+          <p class="desc">Suluhisho kamili kwa biashara kubwa zenye rasilimali zisizo na kikomo.</p>
+          <div class="divider"></div>
+          <div class="usage-title">Mipaka ya Matumizi</div>
+          <div class="usage-grid">
+            <div class="usage-item"><div class="num">10</div><div class="label">Maduka</div></div>
+            <div class="usage-item"><div class="num">1,000,000</div><div class="label">Watumiaji/Duka</div></div>
+            <div class="usage-item"><div class="num">10,000</div><div class="label">Bidhaa/Duka</div></div>
+            <div class="usage-item"><div class="num">500 GB</div><div class="label">Storage</div></div>
+            <div class="usage-item"><div class="num">10</div><div class="label">Themes</div></div>
+          </div>
+          <div class="features-title">Vipengele</div>
+          <ul class="feature-list">
+            <li>Custom Domain</li>
+            <li>Subdomain</li>
+            <li>PWA</li>
+            <li>AI Integration</li>
+            <li>Custom Pages</li>
+            <li>Blog</li>
+            <li>Shipping Method</li>
+          </ul>
+          <button onclick="showPage('signup')" class="btn btn-primary">Anza Sasa →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="why" id="vipengele">
+    <div class="container">
+      <div class="section-title">
+        <h2>Kwa Nini Uchague Jukwaa Letu la SaaS?</h2>
+        <p>Suluhisho kamili la SaaS la maduka mengi ya e-commerce</p>
+      </div>
+      <div class="why-grid">
+        <div>
+          <div class="why-item">
+            <div class="why-icon">🛍️</div>
+            <div><h4>Vipengele Kamili vya E-commerce</h4><p>Usimamizi wa bidhaa, oda, wateja, na blogu.</p></div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">🎨</div>
+            <div><h4>Themes Zilizo Tayari</h4><p>Themes 10+ za kitaalamu zilizo tayari kutumika - hakuna customization inayohitajika, chagua tu na uanze.</p></div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">📱</div>
+            <div><h4>Malipo ya Simu Tanzania</h4><p>Inaauni M-Pesa, Tigo Pesa, Airtel Money na kadi za benki kwa urahisi wa wateja wako.</p></div>
+          </div>
+        </div>
+        <div class="trust-card">
+          <h3>Inaaminika na Wafanyabiashara Duniani</h3>
+          <p>Jiunge na maelfu ya wafanyabiashara waliofaulu waliochagua TBay</p>
+          <div class="trust-grid">
+            <div class="trust-item"><div class="num blue">25,000+</div><div class="label">Maduka Hai</div></div>
+            <div class="trust-item"><div class="num green">98.5%</div><div class="label">Uptime</div></div>
+            <div class="trust-item"><div class="num orange">$2.5M+</div><div class="label">Mapato Yaliyozalishwa</div></div>
+            <div class="trust-item"><div class="num purple">120+</div><div class="label">Nchi Zinazohudumiwa</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="kuhusu">
+    <div class="container">
+      <div class="section-title">
+        <h2>Kuhusu Jukwaa Letu</h2>
+        <p>Ilianzishwa na wataalamu wa SaaS na e-commerce, jukwaa letu limejengwa kutatua changamoto halisi za kusimamia maduka mengi ya mtandaoni.</p>
+      </div>
+      <h3 style="text-align:center; font-size:22px; margin-bottom:20px;">Kubadilisha E-commerce ya Maduka Mengi Tangu 2019</h3>
+      <p>TBay ilizaliwa kutokana na maono ya wataalamu wenye uzoefu wa e-commerce ambao walitambua hitaji la kukua la usimamizi wa maduka mengi kwa pamoja. Kilichoanza kama suluhisho la kusimamia maduka mengi ya mtandaoni sasa kimekua kuwa jukwaa kamili linalohudumia wafanyabiashara 25,000+ katika nchi 120+. Dhamira yetu ni kuwezesha biashara kwa kutoa zana zenye nguvu, rahisi kueleweka zinazowawezesha mtu yeyote kujenga, kusimamia, na kukuza biashara yake ya mtandaoni bila vizuizi vya kiufundi.</p>
+      <div class="about-stats">
+        <div class="about-stat"><div class="num">10+</div><div class="label">Themes za Maduka</div></div>
+        <div class="about-stat"><div class="num">30+</div><div class="label">Payment Gateways</div></div>
+        <div class="about-stat"><div class="num">50+</div><div class="label">Vipengele Hai</div></div>
+        <div class="about-stat"><div class="num">4.9/5</div><div class="label">Kiwango cha Wateja</div></div>
+        <div class="about-stat"><div class="num">&lt;4hrs</div><div class="label">Muda wa Msaada</div></div>
+        <div class="about-stat"><div class="num">94%</div><div class="label">Kiwango cha Mafanikio</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="team">
+    <div class="container">
+      <div class="section-title">
+        <h2>Kutana na Timu Yetu</h2>
+        <p>Kutana na timu yenye shauku nyuma ya mafanikio ya TBay</p>
+      </div>
+      <div class="team-card">
+        <div class="avatar">AR</div>
+        <h3>Alex Rodriguez</h3>
+        <div class="role">CEO & Co-Founder</div>
+        <p class="bio">Alikuwa mkurugenzi mtendaji wa Shopify mwenye uzoefu wa miaka 10+ katika e-commerce. Anapenda kuwawezesha wajasiriamali duniani kote.</p>
+        <div class="socials">
+          <a href="#" title="LinkedIn">in</a>
+          <a href="#" title="Twitter">𝕏</a>
+          <a href="#" title="Email">✉</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="join">
+    <div class="container">
+      <div class="join-card">
+        <h2>Jiunge na Timu Yetu Inayokua</h2>
+        <p>Tunatafuta watu wenye talanta kila wakati ambao wana shauku na e-commerce, teknolojia, na kusaidia wajasiriamali kufanikiwa. Jiunge nasi katika kujenga mustakabali wa majukwaa ya SaaS ya maduka mengi.</p>
+        <button onclick="showPage('signup')" class="btn btn-primary">Tazama Nafasi za Kazi</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="wasiliana">
+    <div class="container">
+      <div class="section-title">
+        <h2>Wasiliana Nasi</h2>
+        <p>Uko tayari kuanza safari yako ya e-commerce?</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-form">
+          <h3>Tuma Ujumbe</h3>
+          <form onsubmit="sendToWhatsApp(event);">
+            <div class="form-group">
+              <label>Jina Kamili *</label>
+              <input type="text" id="waName" placeholder="Mfano: Amani John" required>
+            </div>
+            <div class="form-group">
+              <label>Somo *</label>
+              <input type="text" id="waSubject" placeholder="Mfano: Naomba kujua kuhusu dropshipping" required>
+            </div>
+            <div class="form-group">
+              <label>Ujumbe *</label>
+              <textarea id="waMessage" placeholder="Mfano: Habari TBay, naomba mnijulishe zaidi kuhusu jinsi dropshipping inafanya kazi Tanzania na gharama zake. Asante." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">📨 Tuma Ujumbe</button>
+          </form>
+        </div>
+        <div class="contact-info">
+          <h3>Taarifa za Mawasiliano</h3>
+          <p>Tuko hapa kukusaidia na kujibu swali lolote unaweza kuwa nalo. Tunatarajia kusikia kutoka kwako.</p>
+          <div class="info-item"><div class="info-icon">✉</div><div><h4>Barua Pepe</h4><p>tbaystore@gmail.com</p></div></div>
+          <div class="info-item"><div class="info-icon">📞</div><div><h4>Tupigie</h4><p>+255 750 910 821</p></div></div>
+          <div class="info-item"><div class="info-icon">📍</div><div><h4>Tembelea</h4><p>Dar es Salaam, Tanzania</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo">T<span>Bay</span> 🛒</div>
+          <p>TBay ni jukwaa linaloongoza la SaaS la maduka mengi ya e-commerce linalowawezesha wajasiriamali kuunda, kusimamia, na kukuza maduka yao ya mtandaoni bila kikomo kutoka kwa dashboard moja. Jiunge na maelfu ya wafanyabiashara waliofaulu duniani kote.</p>
+          <div class="footer-contact-item">✉ tbaystore@gmail.com</div>
+          <div class="footer-contact-item">📞 +255 750 910 821</div>
+          <div class="footer-contact-item">📍 Dar es Salaam, Tanzania</div>
+        </div>
+        <div class="footer-col"><h4>Platform</h4><ul><li><a href="#vipengele">Vipengele</a></li><li><a href="#">Themes za Maduka</a></li><li><a href="#bei">Mipango ya Bei</a></li></ul></div>
+        <div class="footer-col"><h4>Kampuni</h4><ul><li><a href="#kuhusu">Kuhusu Sisi</a></li><li><a href="#wasiliana">Wasiliana Nasi</a></li></ul></div>
+        <div class="footer-col"><h4>Rasilimali</h4><ul><li><a href="#">Maswali (FAQ)</a></li><li><a href="#">Dashboard</a></li></ul></div>
+        <div class="footer-col"><h4>Kisheria & Usalama</h4><ul><li><a href="#">Sera ya Faragha</a></li><li><a href="#">Masharti ya Matumizi</a></li><li><a href="#">Sera ya Kurejesha Fedha</a></li></ul></div>
+      </div>
+
+      <div class="newsletter">
+        <h4>Kaa Ukiwa Umeunganishwa na TBay</h4>
+        <p>Pata maarifa ya kipekee ya e-commerce, masasisho ya jukwaa, na mikakati ya ukuaji inayoletwa kwenye kikasha chako.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Asante kwa kujiunga!');">
+          <input type="email" placeholder="Weka barua pepe yako" required>
+          <button type="submit" class="btn btn-primary">Jiunge</button>
+        </form>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 TBay. Haki zote zimehifadhiwa.</p>
+        <div class="footer-socials">
+          <a href="#" title="LinkedIn">in</a>
+          <a href="#" title="Twitter">𝕏</a>
+          <a href="#" title="Facebook">f</a>
+          <a href="#" title="Instagram">📷</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="scroll-hint" id="scrollHint" onclick="scrollDown()">↓</div>
+</div>
+
+<!-- ============================================
+     PAGE 2: SIGNUP
+     ============================================ -->
+<div id="signupPage" class="page">
+  <div class="signup-page">
+    <div class="signup-container">
+      <div class="signup-logo-box">
+        <div class="signup-logo-text">T<span>Bay</span> 🛒</div>
+      </div>
+      <h1 class="signup-title">Jisajili au Ingia</h1>
+      <p class="signup-subtitle">Andika majina yako mawili mara moja ili uanze kutumia mfumo.</p>
+      <form onsubmit="handleSignup(event);">
+        <div class="signup-form-group">
+          <label for="fullname">Majina Mawili</label>
+          <input type="text" id="fullname" name="fullname" placeholder="Andika Jina lako kamili" required autocomplete="name">
+        </div>
+        <button type="submit" class="btn-submit">INGIA</button>
+      </form>
+      <p class="signup-footer-note">Unayo akaunti? <a onclick="showPage('signup')">Ingia hapa</a></p>
+      <button class="back-link" onclick="showPage('home')">← Rudi nyumbani</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     PAGE 3: TBAYTECH DASHBOARD
+     ============================================ -->
+
+<div class="welcome-modal-overlay" id="welcomeModal">
+  <div class="welcome-modal">
+    <div class="welcome-card">
+      <span class="welcome-card-icon">📱</span>
+      <h2 class="welcome-card-title">Weka TbayTech kwenye simu yako</h2>
+      <p class="welcome-card-desc">Gusa hapa chini ili app ijiweke kwenye home screen — kuingia kwa haraka muda wowote.</p>
+      <button class="welcome-install-btn" onclick="handleInstallApp()">
+        <span class="install-icon">⬇️</span><span>Install App</span>
+      </button>
+    </div>
+    <div class="welcome-channel-card">
+      <button class="welcome-channel-btn" onclick="handleJoinChannel()">
+        <span class="wa-icon">💬</span><span>Jiunge na Channel ya TbayTech</span>
+      </button>
+      <p class="welcome-channel-desc">📢 Jiunge na Channel yetu ya WhatsApp ya <strong>TbayTech</strong> ili kupata mafunzo, updates, na msaada wa haraka kila siku!</p>
+    </div>
+    <button class="welcome-skip-btn" onclick="closeWelcomeModal()">Ruka</button>
+  </div>
+</div>
+
+<div class="dashboard-layout" id="dashboardLayout">
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">T<span>Bay</span> 🛒</div>
+    <ul class="sidebar-menu">
+      <li><a href="#" class="active" onclick="showDashboard(event)"><span class="icon">📊</span><span>Dashboard</span></a></li>
+      <li><a href="#" onclick="showBidhaa(event)"><span class="icon">📦</span><span>Bidhaa</span></a></li>
+      <li><a href="#" onclick="showOda(event)"><span class="icon">🛒</span><span>Oda</span></a></li>
+      <li><a href="#" onclick="showRipoti(event)"><span class="icon">📈</span><span>Ripoti</span></a></li>
+      <li><a href="#" onclick="showMsaada(event)"><span class="icon">❓</span><span>Msaada</span></a></li>
+    </ul>
+    <div class="sidebar-footer"></div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div style="display:flex; align-items:center;">
+          <button class="menu-toggle-dash" onclick="openSidebar()">☰</button>
+          <div class="topbar-title">
+            <h1>Karibu, <span id="userName">Mteja</span>! 👋</h1>
+            <p>Hapa ni muhtasari wa biashara yako ya dropshipping leo</p>
+            <div class="topbar-orders-count">📦 Oda zako leo: <span id="ordersTodayCount">0</span></div>
+          </div>
+        </div>
+        <div class="topbar-user">
+          <div class="user-info">
+            <div class="name" id="userName2">Mteja</div>
+            <div class="role">Mmiliki wa Duka</div>
+          </div>
+          <div class="user-avatar" id="userAvatar">M</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wallet-section">
+      <div class="wallet-grid">
+        <div class="wallet-card green-bg">
+          <div class="wallet-card-header">
+            <span class="wallet-card-label">NET PROFIT</span>
+            <span class="wallet-card-icon">📈</span>
+          </div>
+          <div class="wallet-card-content">
+            <div class="wallet-card-value" id="netProfitValue">TSh 10,140</div>
+            <div class="wallet-card-subtitle">Mwezi huu</div>
+            <div class="wallet-card-spacer"></div>
+          </div>
+        </div>
+        <div class="wallet-card red-bg" id="balanceCard">
+          <div class="wallet-card-header">
+            <span class="wallet-card-label">BALANCE</span>
+            <span class="wallet-card-icon">💳</span>
+          </div>
+          <div class="wallet-card-content">
+            <div class="wallet-card-value" id="balanceValue">TSh 10,140</div>
+            <div class="wallet-card-subtitle" style="visibility: hidden;">Mwezi huu</div>
+            <button class="withdraw-btn" id="withdrawBtn" onclick="handleWithdraw()">Toa pesa</button>
+          </div>
+        </div>
+      </div>
+      <button class="withdraw-history-btn" id="withdrawHistoryBtn" onclick="showWithdrawHistory()">
+        <span>🕐</span><span>Withdraw history</span>
+      </button>
+    </div>
+
+    <button class="huduma-btn" onclick="openHuduma()">
+      <span class="huduma-icon">💬</span>
+      <span>HUDUMA<br>KWA<br>WATEJA</span>
+    </button>
+
+    <div class="promo-card">
+      <h2>Weka Oda Sasa Ya Bidhaa Na Ulipwe Kwa Kila Oda</h2>
+      <p>kila oda unayoiweka ni pesa mkononi. Fungua akaunti yako Sasa ili malipo yako yasipotee</p>
+      <button class="fungua-account-btn" onclick="showRegisterPage()">FUNGUA ACCOUNT SASA</button>
+    </div>
+
+    <div class="orders-section">
+      <div class="orders-label">ODA ZILIZOPO LEO</div>
+      <div class="orders-header-row">
+        <div class="orders-title">Oda Za Kuweka Leo</div>
+        <div class="orders-count-badge"><span class="count" id="productCount">8 bidhaa</span></div>
+      </div>
+    </div>
+
+    <h2 class="products-section-title">
+      <span>📦 Chagua Bidhaa Ya Kuweka Oda</span>
+      <span class="live-indicator"><span class="live-dot"></span>LIVE</span>
+    </h2>
+
+    <div class="products-grid" id="productsGrid"></div>
+
+    <div class="dash-panel">
+      <div class="panel-header">
+        <h3>📊 Mauzo ya Wiki Hii</h3>
+        <a href="#">Tazama zote →</a>
+      </div>
+      <div class="chart-container">
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 65%;"></div><div class="chart-label">Jtatu</div></div>
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 50%;"></div><div class="chart-label">Jnne</div></div>
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 80%;"></div><div class="chart-label">Jtano</div></div>
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 60%;"></div><div class="chart-label">Jmosi</div></div>
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 95%;"></div><div class="chart-label">Jpili</div></div>
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 75%;"></div><div class="chart-label">Jumanne</div></div>
+        <div class="chart-bar-wrapper"><div class="chart-bar" style="height: 90%;"></div><div class="chart-label">Leo</div></div>
+      </div>
+    </div>
+
+    <div class="dash-panel">
+      <div class="panel-header">
+        <h3>🛒 Oda za Hivi Karibuni</h3>
+        <a href="#">Tazama zote →</a>
+      </div>
+      <div class="table-wrapper">
+        <table class="dash-table">
+          <thead><tr><th>ODA</th><th>MTEJA</th><th>KIASI</th><th>HALI</th></tr></thead>
+          <tbody id="recentOrdersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="dash-panel">
+      <div class="panel-header">
+        <h3>🔥 Bidhaa Zinazouzwa Zaidi</h3>
+        <a href="#">Zote →</a>
+      </div>
+      <div id="topProductsContainer"></div>
+    </div>
+  </main>
+</div>
+
+<!-- REGISTER PAGE -->
+<div class="auth-page" id="registerPage">
+  <button class="auth-back-btn" onclick="backFromRegister()">←</button>
+  <div class="auth-logo-container">
+    <div class="auth-logo">Tbay<span class="green">Tech</span></div>
+    <div class="auth-tagline">Connect · Learn · Earn</div>
+  </div>
+  <div class="auth-card">
+    <h1 class="auth-title">Create your account</h1>
+    <div class="auth-title-underline"></div>
+    <p class="auth-subtitle">Enter your details below to get started</p>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="regFullName">Full name</label>
+      <input type="text" id="regFullName" class="auth-input" placeholder="John Doe">
+      <div class="auth-error-msg" id="regFullNameError">Tafadhali weka jina lako kamili</div>
+    </div>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="regUsername">Username</label>
+      <input type="text" id="regUsername" class="auth-input" placeholder="mfano: john_doe123">
+      <div class="auth-error-msg" id="regUsernameError">Tafadhali weka username sahihi (angalau herufi 3)</div>
+    </div>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="regPhone">Phone Number <span class="required">*</span></label>
+      <div class="phone-input-wrapper" id="regPhoneWrapper">
+        <div class="phone-country"><span class="phone-flag">🇹🇿</span><span>+255</span></div>
+        <input type="tel" id="regPhone" class="phone-input-field" placeholder="712 345 678" maxlength="12">
+      </div>
+      <div class="auth-error-msg" id="regPhoneError">Tafadhali weka namba sahihi ya simu</div>
+    </div>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="regPassword">Password</label>
+      <input type="password" id="regPassword" class="auth-input" placeholder="Create a password">
+      <div class="auth-error-msg" id="regPasswordError">Password lazima iwe na angalau tarakimu 4</div>
+    </div>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="regConfirmPassword">Confirm password</label>
+      <input type="password" id="regConfirmPassword" class="auth-input" placeholder="Confirm your password">
+      <div class="auth-error-msg" id="regConfirmPasswordError">Password hazifanani</div>
+    </div>
+
+    <div class="auth-checkbox-group">
+      <input type="checkbox" id="regTerms" class="auth-checkbox">
+      <label for="regTerms" class="auth-checkbox-label">I agree to the <a onclick="showTerms()">Terms and Conditions</a></label>
+    </div>
+    <div class="auth-error-msg" id="regTermsError">Tafadhali kubali Terms and Conditions</div>
+
+    <button class="auth-btn" onclick="handleRegister()">Create account</button>
+    <div class="auth-switch">Already have an account? <a onclick="showLoginPage()">Log in</a></div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="auth-page" id="loginPage">
+  <button class="auth-back-btn" onclick="backFromLogin()">←</button>
+  <div class="auth-logo-container">
+    <div class="auth-logo">Tbay<span class="green">Tech</span></div>
+    <div class="auth-tagline">Connect · Learn · Earn</div>
+  </div>
+  <div class="auth-card">
+    <h1 class="auth-title">Log in to your account</h1>
+    <div class="auth-title-underline"></div>
+    <p class="auth-subtitle">Enter your username and password below to log in</p>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="loginUsername">Username</label>
+      <input type="text" id="loginUsername" class="auth-input" placeholder="Enter your username">
+      <div class="auth-error-msg" id="loginUsernameError">Tafadhali weka username yako</div>
+    </div>
+
+    <div class="auth-input-group">
+      <label class="auth-input-label" for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" class="auth-input" placeholder="Enter your password">
+      <div class="auth-error-msg" id="loginPasswordError">Tafadhali weka password yako</div>
+    </div>
+
+    <div class="auth-forgot-link" onclick="showForgotPassword()">Forgot password?</div>
+
+    <div class="auth-checkbox-group">
+      <input type="checkbox" id="loginRemember" class="auth-checkbox">
+      <label for="loginRemember" class="auth-checkbox-label">Remember me</label>
+    </div>
+
+    <button class="auth-btn" onclick="handleLogin()">SIGN IN</button>
+    <div class="auth-switch">Don't have an account? <a onclick="showRegisterPage()">Create one</a></div>
+  </div>
+</div>
+
+<!-- PAYMENT PAGE -->
+<div class="payment-page" id="paymentPage">
+  <div class="payment-header">
+    <button class="payment-header-close" onclick="closePaymentPage()">✕</button>
+    <div class="payment-header-title">Payment</div>
+  </div>
+  <div class="payment-body">
+    <div class="payment-company">
+      <div class="payment-company-logo">T</div>
+      <div class="payment-company-name">TBAY TECHNOLOGIES</div>
+    </div>
+    <h1 class="payment-title">Activate Your Account</h1>
+    <p class="payment-desc">Your account has been created. Pay the activation fee below using any network, then your account will be activated.</p>
+
+    <div class="payment-amount-box">
+      <span class="payment-amount-label">Amount to pay</span>
+      <span class="payment-amount-value">TZS 14,000</span>
+    </div>
+
+    <div class="payment-section-label">Chagua Mtandao Wako</div>
+
+    <div class="network-card" id="networkMpesa">
+      <div class="network-header" onclick="toggleNetwork('networkMpesa')">
+        <div class="network-logo mpesa">M-PESA</div>
+        <div class="network-info"><div class="network-name">Vodacom M-Pesa</div><div class="network-ussd">*150*00#</div></div>
+        <div class="network-arrow">▼</div>
+      </div>
+      <div class="network-steps">
+        <div class="step-item"><div class="step-number">1</div><div class="step-text">Bonyeza <strong>*150*00#</strong></div></div>
+        <div class="step-item"><div class="step-number">2</div><div class="step-text">Chagua <strong>Lipa kwa M-PESA</strong></div></div>
+        <div class="step-item"><div class="step-number">3</div><div class="step-text">Chagua <strong>LIPA KWA SIMU</strong></div></div>
+        <div class="step-highlight">
+          <div class="step-number">4</div>
+          <div class="step-highlight-content">
+            <div class="step-highlight-text">Weka LIPA NAMBA <strong>356876195</strong><br>(TBAY TECHNOLOGIES)</div>
+            <button class="copy-btn" onclick="copyNumber(this, '356876195')">Copy</button>
+          </div>
+        </div>
+        <div class="step-item"><div class="step-number">5</div><div class="step-text">Weka kiasi <strong>TZS 14,000</strong></div></div>
+        <div class="step-item"><div class="step-number">6</div><div class="step-text">Weka namba ya siri</div></div>
+      </div>
+    </div>
+
+    <div class="network-card" id="networkMixx">
+      <div class="network-header" onclick="toggleNetwork('networkMixx')">
+        <div class="network-logo mixx">mixx</div>
+        <div class="network-info"><div class="network-name">Mixx by Yas</div><div class="network-ussd">*150*01#</div></div>
+        <div class="network-arrow">▼</div>
+      </div>
+      <div class="network-steps">
+        <div class="step-item"><div class="step-number">1</div><div class="step-text">Bonyeza <strong>*150*01#</strong></div></div>
+        <div class="step-item"><div class="step-number">2</div><div class="step-text">Chagua <strong>Lipa kwa simu</strong></div></div>
+        <div class="step-item"><div class="step-number">3</div><div class="step-text">Chagua <strong>Kwenda mitandao mingine</strong></div></div>
+        <div class="step-item"><div class="step-number">4</div><div class="step-text">Chagua <strong>M-PESA</strong></div></div>
+        <div class="step-highlight">
+          <div class="step-number">5</div>
+          <div class="step-highlight-content">
+            <div class="step-highlight-text">Weka M-PESA LIPA NAMBA <strong>356876195</strong><br>(TBAY TECHNOLOGIES)</div>
+            <button class="copy-btn" onclick="copyNumber(this, '356876195')">Copy</button>
+          </div>
+        </div>
+        <div class="step-item"><div class="step-number">6</div><div class="step-text">Weka kiasi <strong>TZS 14,000</strong></div></div>
+        <div class="step-item"><div class="step-number">7</div><div class="step-text">Weka namba ya siri</div></div>
+      </div>
+    </div>
+
+    <div class="network-card" id="networkAirtel">
+      <div class="network-header" onclick="toggleNetwork('networkAirtel')">
+        <div class="network-logo airtel">airtel</div>
+        <div class="network-info"><div class="network-name">Airtel Money</div><div class="network-ussd">*150*60#</div></div>
+        <div class="network-arrow">▼</div>
+      </div>
+      <div class="network-steps">
+        <div class="step-item"><div class="step-number">1</div><div class="step-text">Bonyeza <strong>*150*60#</strong></div></div>
+        <div class="step-item"><div class="step-number">2</div><div class="step-text">Chagua <strong>Lipa Bili</strong></div></div>
+        <div class="step-item"><div class="step-number">3</div><div class="step-text">Chagua <strong>LIPA KWA SIMU (MITANDAO YOTE)</strong></div></div>
+        <div class="step-item"><div class="step-number">4</div><div class="step-text">Chagua <strong>LIPA KWA VODA LIPA</strong></div></div>
+        <div class="step-item"><div class="step-number">5</div><div class="step-text">Weka kiasi <strong>TZS 14,000</strong></div></div>
+        <div class="step-highlight">
+          <div class="step-number">6</div>
+          <div class="step-highlight-content">
+            <div class="step-highlight-text">Ingiza kumbukumbu ya malipo <strong>356876195</strong><br>(TBAY TECHNOLOGIES)</div>
+            <button class="copy-btn" onclick="copyNumber(this, '356876195')">Copy</button>
+          </div>
+        </div>
+        <div class="step-item"><div class="step-number">7</div><div class="step-text">Ingiza namba ya siri kuruhusu muamala</div></div>
+      </div>
+    </div>
+
+    <div class="network-card" id="networkHalotel">
+      <div class="network-header" onclick="toggleNetwork('networkHalotel')">
+        <div class="network-logo halotel">halotel</div>
+        <div class="network-info"><div class="network-name">Halotel</div><div class="network-ussd">*150*88#</div></div>
+        <div class="network-arrow">▼</div>
+      </div>
+      <div class="network-steps">
+        <div class="step-item"><div class="step-number">1</div><div class="step-text">Bonyeza <strong>*150*88#</strong></div></div>
+        <div class="step-item"><div class="step-number">2</div><div class="step-text">Chagua namba (5) <strong>Lipa Bidhaa</strong></div></div>
+        <div class="step-item"><div class="step-number">3</div><div class="step-text">Chagua namba (3) <strong>M-PESA</strong></div></div>
+        <div class="step-highlight">
+          <div class="step-number">4</div>
+          <div class="step-highlight-content">
+            <div class="step-highlight-text">Weka namba ya malipo <strong>356876195</strong><br>(TBAY TECHNOLOGIES)</div>
+            <button class="copy-btn" onclick="copyNumber(this, '356876195')">Copy</button>
+          </div>
+        </div>
+        <div class="step-item"><div class="step-number">5</div><div class="step-text">Ingiza kiasi <strong>TZS 14,000</strong></div></div>
+        <div class="step-item"><div class="step-number">6</div><div class="step-text">Ingiza namba ya siri</div></div>
+        <div class="step-item"><div class="step-number">7</div><div class="step-text">Bonyeza moja (1) kuruhusu muamala</div></div>
+      </div>
+    </div>
+
+    <div class="payment-warning">
+      <strong>Zingatia:</strong> Lipa Namba hii ni ya Kampuni, ni ya M-Pesa, jina TBAY TECHNOLOGIES usilipie hela kwa mtu binafsi nje ya iyo lipa ya Kampuni, kuepusha upotevu wa pesa zako. Asante kwa kuchagua TBAY TECHNOLOGIES.
+    </div>
+
+    <button class="payment-confirm-btn" onclick="confirmPayment()">Nimekamilisha Malipo</button>
+    <button class="payment-back-btn" onclick="closePaymentPage()">Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- HUDUMA MODAL -->
+<div class="huduma-modal-overlay" id="hudumaModal">
+  <div class="huduma-modal">
+    <div class="huduma-modal-header">
+      <div class="huduma-modal-title">Wasiliana nasi</div>
+      <button class="huduma-modal-close" onclick="closeHudumaModal()">✕</button>
+    </div>
+    <p class="huduma-modal-subtitle"><strong>Kwa Changamoto yeyote wasiliana nasi</strong><br>Chagua njia ya mawasiliano:</p>
+    <button class="huduma-option whatsapp" onclick="openWhatsApp()"><span class="option-icon">💬</span><span>WhatsApp</span></button>
+    <button class="huduma-option sms" onclick="openSMS()"><span class="option-icon">📩</span><span>SMS</span></button>
+    <button class="huduma-option channel" onclick="openChannel()"><span class="option-icon">📢</span><span>Jiunge channel ya TBAY</span></button>
+  </div>
+</div>
+
+<!-- SMS ERROR MODAL -->
+<div class="sms-error-modal-overlay" id="smsErrorModal">
+  <div class="sms-error-modal">
+    <div class="sms-error-header">
+      <div class="sms-error-title">Wasiliana nasi</div>
+      <button class="sms-error-close" onclick="closeSmsErrorModal()">✕</button>
+    </div>
+    <p class="sms-error-subtitle">Chagua njia ya mawasiliano:</p>
+    <div class="sms-error-box">
+      <div class="sms-error-text">Hitilafu kwenye mfumo! WhatsApp haipatikani kwa sasa. Tafadhali wasiliana nasi kwa njia ya SMS ya kawaida.</div>
+    </div>
+    <div class="sms-error-actions">
+      <button class="sms-error-btn" onclick="openSMSFromError()"><span>📩</span><span>SMS ya kawaida</span></button>
+      <button class="sms-error-btn secondary" onclick="openSMS()"><span>📩</span><span>SMS</span></button>
+      <button class="sms-error-btn secondary" onclick="openChannel()"><span>📢</span><span>Jiunge channel ya TBAY</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL PAGE -->
+<div class="detail-page" id="detailPage" data-product-id="0">
+  <div class="detail-header">
+    <button class="detail-back-btn" onclick="closeDetail()">←</button>
+    <div class="detail-brand"><div class="brand-icon">T</div><span>TbayTech</span></div>
+    <div class="detail-header-actions">
+      <div class="cart-icon" onclick="alert('Cart ina bidhaa')">🛒</div>
+      <button class="icon-btn" onclick="alert('Profile')">👤</button>
+      <button class="icon-btn" onclick="alert('Menu')">☰</button>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-image-container"><img id="detailImage" src="" alt=""></div>
+    <div class="detail-info">
+      <span class="detail-category-tag" id="detailCategory">Fitness</span>
+      <h1 class="detail-title" id="detailTitle">Smart Fitness Tracker</h1>
+      <div class="detail-rating-row">
+        <span class="star">★</span><span id="detailRating">4.6</span>
+        <span>·</span><span class="brand-name">TbayTech</span>
+        <span class="in-stock">In Stock</span>
+      </div>
+      <div class="detail-price-row">
+        <span class="current-price" id="detailPrice">$49.99</span>
+        <span class="old-price" id="detailOldPrice">$79.99</span>
+        <span class="discount-badge" id="detailDiscount">-38%</span>
+      </div>
+      <p class="detail-desc" id="detailDesc">Track steps, sleep, heart rate & 14 sports modes. Waterproof.</p>
+      <div class="detail-stats">
+        <div class="detail-stat-item"><span class="stat-icon-big">👁</span><div class="stat-number" id="detailViewers">4,280</div><div class="stat-label">Viewers</div></div>
+        <div class="detail-stat-item"><span class="stat-icon-big">🛒</span><div class="stat-number" id="detailSold">1,350</div><div class="stat-label">Sold</div></div>
+        <div class="detail-stat-item"><span class="stat-icon-big">❤</span><div class="stat-number" id="detailLikes">1,710</div><div class="stat-label">Likes</div></div>
+        <div class="detail-stat-item"><span class="stat-icon-big">⭐</span><div class="stat-number" id="detailRating2">4.6</div><div class="stat-label">Rating</div></div>
+      </div>
+      <div class="detail-actions">
+        <button class="detail-btn-weka-oda" id="detailBtnWekaOda">Weka Oda</button>
+        <button class="detail-btn-nunua" onclick="nunuaSasa()">Nunua Sasa</button>
+        <button class="detail-btn-heart" id="detailHeartBtn" onclick="toggleHeart(this)">♡</button>
+      </div>
+      <div class="detail-share">
+        <button class="share-btn" onclick="shareProduct()">🔗</button>
+        <button class="share-btn" onclick="alert('Shared to WhatsApp')">📤</button>
+      </div>
+      <div class="detail-info-items">
+        <div class="detail-info-item"><span class="info-icon">🚚</span><span>Free shipping</span></div>
+        <div class="detail-info-item"><span class="info-icon">🛡️</span><span>12-month manufacturer warranty included.</span></div>
+        <div class="detail-info-item"><span class="info-icon">🔄</span><span>30-day returns</span></div>
+      </div>
+      <div class="detail-features">
+        <h3>Features</h3>
+        <ul>
+          <li>Premium build quality</li>
+          <li>1-year warranty</li>
+          <li>Free worldwide shipping</li>
+          <li>30-day returns</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHONE INPUT MODAL -->
+<div class="phone-modal-overlay" id="phoneModal">
+  <div class="phone-modal">
+    <div class="phone-modal-header">
+      <div class="phone-modal-icon">📱</div>
+      <div class="phone-modal-title">Weka Namba Yako Ya Simu</div>
+      <div class="phone-modal-subtitle">Utakayopokelea Taharifa Kusuhu Oda Yako</div>
+    </div>
+    <div class="phone-input-group">
+      <label class="phone-input-label" for="phoneInput">Namba ya Simu</label>
+      <input type="tel" id="phoneInput" class="phone-input" placeholder="Mfano: 0712345678" maxlength="13" autocomplete="tel">
+      <div class="phone-error-msg" id="phoneErrorMsg">Tafadhali weka namba sahihi ya simu</div>
+    </div>
+    <button class="phone-modal-btn" id="phoneSubmitBtn" onclick="submitPhoneNumber()"><span>✅</span><span>THIBITISHA</span></button>
+    <button class="phone-modal-cancel" onclick="closePhoneModal()">Ghairi</button>
+  </div>
+</div>
+
+<!-- WITHDRAWAL MODAL -->
+<div class="withdraw-modal-overlay" id="withdrawModal">
+  <div class="withdraw-card" id="withdrawCard1">
+    <div class="withdraw-card-header">
+      <div class="withdraw-card-title">Toa pesa</div>
+      <button class="withdraw-card-close" onclick="closeWithdrawModal()">✕</button>
+    </div>
+    <div class="withdraw-input-group">
+      <label class="withdraw-input-label">Ingiza kiasi unachotaka kutoa</label>
+      <div class="withdraw-balance-info">Salio lako: <strong id="withdrawBalanceDisplay">TSh 0</strong></div>
+      <input type="text" id="withdrawAmountInput" class="withdraw-amount-input" placeholder="0" inputmode="numeric" autocomplete="off">
+      <div class="withdraw-error-msg" id="withdrawErrorMsg"></div>
+    </div>
+    <button class="withdraw-submit-btn" onclick="submitWithdrawAmount()">TOA PESA</button>
+  </div>
+
+  <div class="withdraw-card" id="withdrawCard2" style="display:none;">
+    <div class="withdraw-card-header">
+      <div class="withdraw-card-title">Toa pesa</div>
+      <button class="withdraw-card-close" onclick="closeWithdrawModal()">✕</button>
+    </div>
+    <div class="withdraw-loading">
+      <div class="withdraw-loading-spinner"></div>
+      <div class="withdraw-loading-title">Inachakata malipo yako...</div>
+      <div class="withdraw-loading-subtitle">Tafadhali subiri, malipo yako yanashughulikiwa.</div>
+    </div>
+  </div>
+
+  <div class="withdraw-card" id="withdrawCard3" style="display:none;">
+    <div class="withdraw-card-header">
+      <div class="withdraw-card-title">Toa pesa</div>
+      <button class="withdraw-card-close" onclick="closeWithdrawModal()">✕</button>
+    </div>
+    <div class="withdraw-result-icon error">⚠️</div>
+    <div class="withdraw-result-title">Malipo yameshindwa kukufikia!</div>
+    <div class="withdraw-result-subtext">Pesa yako imerudishwa kwenye balance yako</div>
+    <div class="withdraw-result-text">Hakuna namba yoyote uliyo iweka kwenye mfumo ilikupokea malipo yako. Fungua account sasa ili muamala wako uingizwe kwenye namba yako ya simu na kuepuka kupoteza pesa zako.</div>
+    <div class="withdraw-result-actions">
+      <button class="withdraw-result-btn" onclick="funguaAccountFromWithdraw()">FUNGUA ACCOUNT SASA</button>
+      <button class="withdraw-result-btn secondary" onclick="closeWithdrawModal()">Rudi nyuma</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING PAGE -->
+<div class="loading-page" id="loadingPage">
+  <div class="loading-spinner"></div>
+  <h2 class="loading-title">Inachakata oda yako...</h2>
+  <p class="loading-subtitle">Tafadhali subiri kidogo. Usifunge ukurasa huu.</p>
+</div>
+
+<!-- SUCCESS PAGE -->
+<div class="success-page" id="successPage">
+  <div class="success-card">
+    <div class="success-header">
+      <div class="success-icon-flower"><div class="check-circle">✓</div></div>
+      <div class="success-title-box">
+        <div class="success-title">Hongera!</div>
+        <div class="success-subtitle">Oda yako imewekwa kikamilifu.</div>
+      </div>
+    </div>
+    <div class="success-divider"></div>
+    <div class="success-amount" id="successAmount">Umelipwa USD $0 Sawa na TSh 0 kwa oda yako ya USD $0.</div>
+    <div class="success-box">
+      <span class="success-box-icon">💼</span>
+      <span class="success-box-text">Malipo yako yamewekwa kwenye <strong>balance yako</strong>. Gusa <strong>Toa pesa</strong> kupokea malipo yako</span>
+    </div>
+    <div class="success-box warning">
+      <span class="success-box-icon">⚠️</span>
+      <span class="success-box-text">Oda yako ikinunuliwa utalipwa <strong id="successUsdAgain">USD $0</strong> Sawa na <strong id="successTshAgain">TSh 0</strong>, na itaongezwa kwenye balance yako.</span>
+    </div>
+    <div class="success-note">
+      <span class="success-note-icon">📌</span>
+      <span><strong>Note:</strong> kumbuka kurejea kwenye akaunti yako angalau baada ya dakika 60, kujuwa hali ya oda yako kama imenunuliwa tayari upokee malipo yako.</span>
+    </div>
+    <button class="success-withdraw-btn" onclick="goToWithdraw()"><span>💰</span><span>TOA PESA</span></button>
+  </div>
+</div>
+
+<!-- CONGRATULATIONS POPUP -->
+<div class="congrats-page" id="congratsPage">
+  <div class="congrats-card">
+    <div class="congrats-icon">🎉</div>
+    <h1 class="congrats-title">Hongera Sana!</h1>
+    <p class="congrats-subtitle">Oda yako imenunuliwa tayari!</p>
+    <div class="congrats-info-box">
+      <div class="congrats-info-row"><span class="label">📅 Tarehe:</span><span class="value" id="congratsDate">—</span></div>
+      <div class="congrats-info-row"><span class="label">🕐 Muda:</span><span class="value" id="congratsTime">—</span></div>
+      <div class="congrats-info-row"><span class="label">📦 Bidhaa:</span><span class="value" id="congratsProduct">—</span></div>
+    </div>
+    <div class="congrats-amount">Umelipwa:<span class="highlight" id="congratsAmount">TSh 0</span></div>
+    <div class="congrats-message">✅ Pesa zako zimeongezwa kwenye <strong>balance yako</strong>.</div>
+    <button class="congrats-btn" onclick="goToBalanceFromCongrats()"><span>💰</span><span>TOA PESA</span></button>
+  </div>
+</div>
+
+<!-- SMS NOTIFICATION -->
+<div class="sms-notification" id="smsNotification">
+  <div class="sms-icon">💬</div>
+  <div class="sms-content">
+    <div class="sms-sender">TbayTech Technologies</div>
+    <div class="sms-text" id="smsText"></div>
+  </div>
+</div>
+
+<!-- ============================================
+     JAVASCRIPT ZOTE
+     ============================================ -->
+
+<script>
+  // ============================================
+  // PAGE SWITCHING + HISTORY MANAGEMENT
+  // ============================================
+  history.replaceState({ page: 'home' }, '', '');
+
+  function showPage(page, pushHistory = true) {
+    document.getElementById('homePage').classList.remove('active');
+    document.getElementById('signupPage').classList.remove('active');
+
+    if (page === 'home') {
+      document.getElementById('homePage').classList.add('active');
+    } else if (page === 'signup') {
+      document.getElementById('signupPage').classList.add('active');
+    }
+    window.scrollTo(0, 0);
+
+    if (pushHistory) {
+      history.pushState({ page: page }, '', '');
+    }
+  }
+
+  window.addEventListener('popstate', function(event) {
+    const page = (event.state && event.state.page) ? event.state.page : 'home';
+    if (page === 'signup') {
+      showPage('signup', false);
+    } else {
+      showPage('home', false);
+    }
+  });
+
+  // ============================================
+  // HANDLE SIGNUP
+  // ============================================
+  function handleSignup(event) {
+    event.preventDefault();
+    const name = document.getElementById('fullname').value.trim();
+
+    if (name.length < 3) {
+      alert('Tafadhali andika majina yako mawili kamili.');
+      return;
+    }
+
+    const firstName = name.split(' ')[0];
+
+    localStorage.setItem('tbay_username', name);
+    localStorage.setItem('tbaytech_username', name);
+
+    document.getElementById('homePage').classList.remove('active');
+    document.getElementById('signupPage').classList.remove('active');
+
+    document.getElementById('dashboardLayout').style.display = 'block';
+
+    const userNameEl = document.getElementById('userName');
+    const userName2El = document.getElementById('userName2');
+    const userAvatarEl = document.getElementById('userAvatar');
+
+    if (userNameEl) userNameEl.textContent = firstName;
+    if (userName2El) userName2El.textContent = name;
+    if (userAvatarEl) userAvatarEl.textContent = firstName.charAt(0).toUpperCase();
+
+    if (typeof loadUserData === 'function') loadUserData();
+    if (typeof initDynamicProducts === 'function' && !window._dashboardInitialized) {
+      initDynamicProducts();
+      initRecentOrders();
+      initTopProducts();
+      initProductCount();
+      window._dashboardInitialized = true;
+    }
+
+    setTimeout(() => {
+      if (typeof shouldShowWelcome === 'function' && shouldShowWelcome()) {
+        showWelcomeModal();
+      }
+    }, 800);
+  }
+
+  // ============================================
+  // TUMA UJUMBE KWA WHATSAPP
+  // ============================================
+  function sendToWhatsApp(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('waName').value.trim();
+    const subject = document.getElementById('waSubject').value.trim();
+    const message = document.getElementById('waMessage').value.trim();
+
+    const whatsappNumber = '255750910821';
+
+    const text =
+      '*🌟 Ujumbe Mpya kutoka TBay Website*%0A%0A' +
+      '*👤 Jina:* ' + name + '%0A' +
+      '*📌 Somo:* ' + subject + '%0A%0A' +
+      '*💬 Ujumbe:*%0A' + message;
+
+    const url = 'https://wa.me/' + whatsappNumber + '?text=' + text;
+    window.open(url, '_blank');
+
+    document.getElementById('waName').value = '';
+    document.getElementById('waSubject').value = '';
+    document.getElementById('waMessage').value = '';
+
+    alert('Asante ' + name + '! WhatsApp yako inafunguka...');
+  }
+
+  // ============================================
+  // AUTO-SCROLL
+  // ============================================
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      if (document.getElementById('homePage').classList.contains('active')) {
+        slowScrollTo(180, 4000);
+
+        const hint = document.getElementById('scrollHint');
+        if (hint) {
+          setTimeout(function() { hint.classList.add('show'); }, 800);
+          setInterval(function() {
+            hint.classList.remove('show');
+            setTimeout(function() { hint.classList.add('show'); }, 2000);
+          }, 6000);
+        }
+      }
+    }, 3000);
+  });
+
+  function slowScrollTo(targetY, duration) {
+    const startY = window.pageYOffset;
+    const distance = targetY - startY;
+    const startTime = performance.now();
+
+    function step(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      window.scrollTo(0, startY + distance * ease);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function scrollDown() {
+    slowScrollTo(window.pageYOffset + 500, 1500);
+  }
+</script>
+
+<script>
+  // ============================================
+  // WELCOME MODAL LOGIC
+  // ============================================
+  const WELCOME_KEY = 'tbaytech_welcome_shown';
+  const INSTALL_KEY = 'tbaytech_install_clicked';
+  const CHANNEL_KEY = 'tbaytech_channel_clicked';
+
+  function shouldShowWelcome() {
+    return !localStorage.getItem(WELCOME_KEY);
+  }
+
+  function showWelcomeModal() {
+    document.getElementById('welcomeModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeWelcomeModal() {
+    document.getElementById('welcomeModal').classList.remove('show');
+    document.body.style.overflow = '';
+    localStorage.setItem(WELCOME_KEY, 'true');
+    setTimeout(() => {
+      const completed = checkPendingOrders();
+      if (completed) {
+        showCongratsPopup(completed);
+        notifyUserOrderCompleted(completed);
+      }
+    }, 500);
+  }
+
+  function handleInstallApp() {
+    localStorage.setItem(INSTALL_KEY, 'true');
+
+    if (window.deferredPrompt) {
+      window.deferredPrompt.prompt();
+      window.deferredPrompt.userChoice.then((choiceResult) => {
+        console.log('Install choice:', choiceResult.outcome);
+        window.deferredPrompt = null;
+      });
+    } else {
+      alert('Ili ku-install TbayTech kwenye simu yako:\n\n' +
+            '1. Gusa menu ya browser (⋮ au ⋯)\n' +
+            '2. Chagua "Add to Home screen" au "Install App"\n' +
+            '3. Gusa "Install" au "Add"\n\n' +
+            'App itaonekana kwenye home screen yako!');
+    }
+
+    checkAndCloseWelcome();
+  }
+
+  function handleJoinChannel() {
+    localStorage.setItem(CHANNEL_KEY, 'true');
+
+    const channelUrl = 'https://whatsapp.com/channel/0029VbDIBge2phHVrfI38y2B';
+    window.open(channelUrl, '_blank');
+
+    checkAndCloseWelcome();
+  }
+
+  function checkAndCloseWelcome() {
+    const installClicked = localStorage.getItem(INSTALL_KEY);
+    const channelClicked = localStorage.getItem(CHANNEL_KEY);
+    if (installClicked && channelClicked) {
+      closeWelcomeModal();
+    }
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.deferredPrompt = e;
+  });
+
+  // ============================================
+  // AUTH SYSTEM
+  // ============================================
+  function getUsers() { return JSON.parse(localStorage.getItem('tbaytech_users') || '[]'); }
+  function saveUsers(users) { localStorage.setItem('tbaytech_users', JSON.stringify(users)); }
+  function getCurrentUser() {
+    const username = localStorage.getItem('tbaytech_current_user');
+    if (!username) return null;
+    return getUsers().find(u => u.username === username);
+  }
+  function setCurrentUser(username) { localStorage.setItem('tbaytech_current_user', username); }
+  function clearCurrentUser() { localStorage.removeItem('tbaytech_current_user'); }
+  function getPaidUsers() { return JSON.parse(localStorage.getItem('tbaytech_paid_users') || '[]'); }
+  function markUserPaid(username) {
+    const paid = getPaidUsers();
+    if (!paid.includes(username)) {
+      paid.push(username);
+      localStorage.setItem('tbaytech_paid_users', JSON.stringify(paid));
+    }
+  }
+  function isUserPaid(username) { return getPaidUsers().includes(username); }
+
+  function showRegisterPage() {
+    document.getElementById('loginPage').classList.remove('show');
+    document.getElementById('paymentPage').classList.remove('show');
+    document.getElementById('dashboardLayout').style.display = 'none';
+    document.getElementById('registerPage').classList.add('show');
+    window.scrollTo(0, 0);
+  }
+  function showLoginPage() {
+    document.getElementById('registerPage').classList.remove('show');
+    document.getElementById('paymentPage').classList.remove('show');
+    document.getElementById('dashboardLayout').style.display = 'none';
+    document.getElementById('loginPage').classList.add('show');
+    window.scrollTo(0, 0);
+  }
+  function showPaymentPage() {
+    document.getElementById('registerPage').classList.remove('show');
+    document.getElementById('loginPage').classList.remove('show');
+    document.getElementById('dashboardLayout').style.display = 'none';
+    document.getElementById('paymentPage').classList.add('show');
+    window.scrollTo(0, 0);
+  }
+  function showDashboardPage() {
+    document.getElementById('registerPage').classList.remove('show');
+    document.getElementById('loginPage').classList.remove('show');
+    document.getElementById('paymentPage').classList.remove('show');
+    document.getElementById('dashboardLayout').style.display = 'block';
+    window.scrollTo(0, 0);
+    loadUserData();
+  }
+  function backFromRegister() { showDashboardPage(); }
+  function backFromLogin() { showRegisterPage(); }
+
+  function handleRegister() {
+    const fullName = document.getElementById('regFullName').value.trim();
+    const username = document.getElementById('regUsername').value.trim().toLowerCase();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
+    const terms = document.getElementById('regTerms').checked;
+
+    let valid = true;
+    if (!fullName || fullName.length < 3) { showError('regFullName', 'regFullNameError'); valid = false; }
+    else hideError('regFullName', 'regFullNameError');
+    if (!username || username.length < 3) { showError('regUsername', 'regUsernameError'); valid = false; }
+    else hideError('regUsername', 'regUsernameError');
+
+    const cleanedPhone = phone.replace(/[\s\-()]/g, '');
+    const phonePatterns = [/^[67]\d{8}$/, /^0[67]\d{8}$/, /^255[67]\d{8}$/, /^\+255[67]\d{8}$/];
+    if (!phonePatterns.some(p => p.test(cleanedPhone))) {
+      document.getElementById('regPhoneWrapper').classList.add('error');
+      document.getElementById('regPhoneError').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('regPhoneWrapper').classList.remove('error');
+      document.getElementById('regPhoneError').classList.remove('show');
+    }
+
+    if (!password || password.length < 4) { showError('regPassword', 'regPasswordError'); valid = false; }
+    else hideError('regPassword', 'regPasswordError');
+    if (confirmPassword !== password) { showError('regConfirmPassword', 'regConfirmPasswordError'); valid = false; }
+    else hideError('regConfirmPassword', 'regConfirmPasswordError');
+    if (!terms) { document.getElementById('regTermsError').classList.add('show'); valid = false; }
+    else document.getElementById('regTermsError').classList.remove('show');
+
+    if (!valid) return;
+
+    const users = getUsers();
+    if (users.find(u => u.username === username)) {
+      showError('regUsername', 'regUsernameError', 'Username hii imetumika. Tafadhali chagua nyingine.');
+      return;
+    }
+
+    const newUser = {
+      fullName, username,
+      phone: cleanedPhone.startsWith('0') ? '+255' + cleanedPhone.substring(1) : '+255' + cleanedPhone,
+      password, createdAt: new Date().toISOString()
+    };
+    users.push(newUser);
+    saveUsers(users);
+    setCurrentUser(username);
+    showPaymentPage();
+  }
+
+  function showError(inputId, errorId, customMsg) {
+    document.getElementById(inputId).classList.add('error');
+    const errEl = document.getElementById(errorId);
+    if (customMsg) errEl.textContent = customMsg;
+    errEl.classList.add('show');
+  }
+  function hideError(inputId, errorId) {
+    document.getElementById(inputId).classList.remove('error');
+    document.getElementById(errorId).classList.remove('show');
+  }
+
+  function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    let valid = true;
+    if (!username) { showError('loginUsername', 'loginUsernameError'); valid = false; }
+    else hideError('loginUsername', 'loginUsernameError');
+    if (!password) { showError('loginPassword', 'loginPasswordError'); valid = false; }
+    else hideError('loginPassword', 'loginPasswordError');
+    if (!valid) return;
+
+    const users = getUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+    if (!user) {
+      showError('loginPassword', 'loginPasswordError', 'Username au password si sahihi. Tafadhali jaribu tena.');
+      return;
+    }
+
+    setCurrentUser(username);
+    showPaymentPage();
+  }
+
+  function showForgotPassword() {
+    alert('Tafadhali wasiliana nasi kwa msaada wa kubadilisha password yako.');
+  }
+  function showTerms() {
+    alert('Terms and Conditions:\n\n1. Akaunti hii ni kwa ajili ya biashara ya dropshipping.\n2. Malipo yote yatachakatwa kwa usalama.\n3. Unakubali kutokuwa na tabia za udanganyifu.\n4. TbayTech inahifadhi haki ya kubadilisha masharti yoyote.');
+  }
+
+  function toggleNetwork(id) {
+    const card = document.getElementById(id);
+    const isActive = card.classList.contains('active');
+    document.querySelectorAll('.network-card').forEach(c => c.classList.remove('active'));
+    if (!isActive) card.classList.add('active');
+  }
+  function copyNumber(btn, number) {
+    navigator.clipboard.writeText(number).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => {
+      const temp = document.createElement('textarea');
+      temp.value = number;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+  function closePaymentPage() {
+    document.getElementById('paymentPage').classList.remove('show');
+    showDashboardPage();
+  }
+  function confirmPayment() {
+    const user = getCurrentUser();
+    if (user) markUserPaid(user.username);
+    const companyPhone = '+255750910821';
+    const message = encodeURIComponent('Nimekamilisha malipo! Naomba muongozo nipate akaunti, ili nipokee malipo yangu muda huu.!');
+    window.location.href = 'sms:' + companyPhone + '?body=' + message;
+    setTimeout(() => {
+      alert('Asante! SMS yako imetumwa. Tutakujibu hivi punde.');
+      document.getElementById('paymentPage').classList.remove('show');
+      showDashboardPage();
+    }, 1500);
+  }
+
+  function handleLogout() {
+    if (confirm('Una uhakika unataka kutoka kwenye akaunti yako?')) {
+      clearCurrentUser();
+      showDashboardPage();
+    }
+  }
+
+  function loadUserData() {
+    const user = getCurrentUser();
+    if (user) {
+      const firstName = user.fullName.split(' ')[0];
+      document.getElementById('userName').textContent = firstName;
+      document.getElementById('userName2').textContent = user.fullName;
+      document.getElementById('userAvatar').textContent = firstName.charAt(0).toUpperCase();
+    } else {
+      const savedName = localStorage.getItem('tbaytech_username');
+      if (savedName) {
+        const firstName = savedName.split(' ')[0];
+        document.getElementById('userName').textContent = firstName;
+        document.getElementById('userName2').textContent = savedName;
+        document.getElementById('userAvatar').textContent = firstName.charAt(0).toUpperCase();
+      } else {
+        document.getElementById('userName').textContent = 'Mteja';
+        document.getElementById('userName2').textContent = 'Mteja';
+        document.getElementById('userAvatar').textContent = 'M';
+      }
+    }
+    updateBalanceUI();
+    document.getElementById('ordersTodayCount').textContent = getTodayOrderCount();
+    if (!window._dashboardInitialized) {
+      initDynamicProducts();
+      initRecentOrders();
+      initTopProducts();
+      initProductCount();
+      window._dashboardInitialized = true;
+    }
+    const savedPhone = localStorage.getItem('tbaytech_phone');
+    if (savedPhone) document.getElementById('phoneInput').value = savedPhone;
+  }
+
+  const BACKEND_URL = 'https://tbay-sms-backend.onrender.com';
+  const EXCHANGE_RATE = 2600;
+
+  function generatePayout() {
+    const minTsh = 16000;
+    const maxTsh = 20000;
+    const steps = (maxTsh - minTsh) / 100;
+    const randomStep = Math.floor(Math.random() * (steps + 1));
+    const tshAmount = minTsh + (randomStep * 100);
+    const usdAmount = parseFloat((tshAmount / EXCHANGE_RATE).toFixed(2));
+    return { tsh: tshAmount, usd: usdAmount };
+  }
+
+  function getOrderAmountTsh(productPriceUsd) {
+    const priceTsh = productPriceUsd * EXCHANGE_RATE;
+    const percent = 20 + Math.random() * 8;
+    let amountTsh = priceTsh * (percent / 100);
+    if (amountTsh < 20000) amountTsh = 20000;
+    if (amountTsh > 90000) amountTsh = 90000;
+    amountTsh = Math.round(amountTsh / 100) * 100;
+    return amountTsh;
+  }
+
+  function getTodayKey() {
+    const today = new Date();
+    return 'orders_' + today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+  }
+  function getTodayOrderCount() { return parseInt(localStorage.getItem(getTodayKey()) || '0'); }
+  function incrementTodayOrderCount() {
+    const current = getTodayOrderCount();
+    localStorage.setItem(getTodayKey(), (current + 1).toString());
+    return current + 1;
+  }
+  function getSavedBalance() {
+    const saved = localStorage.getItem('tbaytech_balance_tsh');
+    return saved ? parseInt(saved) : 10140;
+  }
+  function saveBalance(amount) { localStorage.setItem('tbaytech_balance_tsh', amount.toString()); }
+  function getSavedNetProfit() {
+    const saved = localStorage.getItem('tbaytech_netprofit_tsh');
+    return saved ? parseInt(saved) : 10140;
+  }
+  function saveNetProfit(amount) { localStorage.setItem('tbaytech_netprofit_tsh', amount.toString()); }
+  let balanceTsh = getSavedBalance();
+  let netProfitTsh = getSavedNetProfit();
+  function updateBalanceUI() {
+    document.getElementById('balanceValue').textContent = 'TSh ' + balanceTsh.toLocaleString();
+    document.getElementById('netProfitValue').textContent = 'TSh ' + netProfitTsh.toLocaleString();
+  }
+  function addToBalance(amount) {
+    balanceTsh += amount; netProfitTsh += amount;
+    saveBalance(balanceTsh); saveNetProfit(netProfitTsh);
+    updateBalanceUI();
+  }
+
+  function getPendingOrders() {
+    return JSON.parse(localStorage.getItem('tbaytech_pending_orders') || '[]');
+  }
+  function savePendingOrders(orders) {
+    localStorage.setItem('tbaytech_pending_orders', JSON.stringify(orders));
+  }
+  function getCompletedOrders() {
+    return JSON.parse(localStorage.getItem('tbaytech_completed_orders') || '[]');
+  }
+  function saveCompletedOrders(orders) {
+    localStorage.setItem('tbaytech_completed_orders', JSON.stringify(orders));
+  }
+
+  function recordPendingOrder(orderData) {
+    const now = new Date();
+    const pending = getPendingOrders();
+    const newOrder = {
+      id: 'ord_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+      productName: orderData.name,
+      productPriceUsd: orderData.productPriceUsd,
+      payoutTsh: orderData.tsh,
+      payoutUsd: orderData.usd,
+      orderAmountTsh: orderData.orderTsh,
+      orderAmountUsd: orderData.orderUsd,
+      phone: orderData.phone,
+      timestamp: now.toISOString(),
+      displayDate: formatDateSw(now),
+      displayTime: formatTimeSw(now),
+      status: 'pending'
+    };
+    pending.push(newOrder);
+    savePendingOrders(pending);
+    return newOrder;
+  }
+
+  function formatDateSw(date) {
+    const months = ['Januari','Februari','Machi','Aprili','Mei','Juni','Julai','Agosti','Septemba','Oktoba','Novemba','Desemba'];
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return day + ' ' + month + ' ' + year;
+  }
+
+  function formatTimeSw(date) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return hours + ':' + minutes;
+  }
+
+  function checkPendingOrders() {
+    const pending = getPendingOrders();
+    if (pending.length === 0) return null;
+
+    const now = Date.now();
+    const COMPLETE_AFTER_MIN = 30;
+    const COMPLETE_BEFORE_MIN = 40;
+    const minMs = COMPLETE_AFTER_MIN * 60 * 1000;
+    const maxMs = COMPLETE_BEFORE_MIN * 60 * 1000;
+
+    const completed = getCompletedOrders();
+    const stillPending = [];
+    let newlyCompleted = null;
+
+    pending.forEach(order => {
+      const createdTime = new Date(order.timestamp).getTime();
+      const elapsed = now - createdTime;
+
+      if (elapsed >= minMs && elapsed <= maxMs) {
+        order.status = 'completed';
+        order.completedAt = new Date().toISOString();
+        completed.push(order);
+        newlyCompleted = order;
+      } else if (elapsed > maxMs) {
+        order.status = 'completed';
+        order.completedAt = new Date().toISOString();
+        completed.push(order);
+        if (!newlyCompleted) newlyCompleted = order;
+      } else {
+        stillPending.push(order);
+      }
+    });
+
+    savePendingOrders(stillPending);
+    saveCompletedOrders(completed);
+    return newlyCompleted;
+  }
+
+  function showCongratsPopup(order) {
+    document.getElementById('congratsDate').textContent = order.displayDate;
+    document.getElementById('congratsTime').textContent = order.displayTime;
+    document.getElementById('congratsProduct').textContent = order.productName;
+    document.getElementById('congratsAmount').textContent = 'TSh ' + order.orderAmountTsh.toLocaleString();
+
+    addToBalance(order.orderAmountTsh);
+
+    document.getElementById('congratsPage').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  async function notifyUserOrderCompleted(order) {
+    try {
+      await fetch(BACKEND_URL + '/api/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: order.phone,
+          orderName: order.productName,
+          payoutTsh: order.orderAmountTsh,
+          type: 'completed'
+        })
+      });
+    } catch (error) { console.error('❌', error); }
+  }
+
+  function goToBalanceFromCongrats() {
+    document.getElementById('congratsPage').classList.remove('show');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      const balanceCard = document.getElementById('balanceCard');
+      balanceCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      balanceCard.classList.add('highlight');
+      const withdrawBtn = document.getElementById('withdrawBtn');
+      withdrawBtn.classList.add('pulse');
+      setTimeout(() => balanceCard.classList.remove('highlight'), 4000);
+      setTimeout(() => withdrawBtn.classList.remove('pulse'), 8000);
+    }, 300);
+  }
+
+  const allProducts = [];
+  let productIdCounter = 0;
+  function addProduct(name, category, rating, desc, price, oldPrice, img) {
+    allProducts.push({
+      id: productIdCounter++, name, category, rating, desc, price, oldPrice,
+      views: Math.floor(Math.random() * 5000) + 500,
+      cart: Math.floor(Math.random() * 900) + 100,
+      likes: Math.floor(Math.random() * 2000) + 200,
+      img
+    });
+  }
+
+  const electronics = [
+    ["4K Camera Drone", 4.6, "GPS-stabilized 4K drone with 30-min flight time.", 349.99, 499.99, "https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=400&h=300&fit=crop"],
+    ["Smart Watch Pro", 4.7, "Fitness tracker with heart rate, GPS, and 7-day battery.", 89.99, 149.99, "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&h=300&fit=crop"],
+    ["Wireless Earbuds Pro", 4.8, "Noise-cancelling earbuds with 36-hour battery life.", 59.99, 99.99, "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=300&fit=crop"],
+    ["Portable Power Bank", 4.5, "20000mAh power bank with fast charging.", 49.99, 79.99, "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&h=300&fit=crop"],
+    ["Smart LED Bulb", 4.4, "WiFi smart LED bulb with color changing.", 19.99, 34.99, "https://images.unsplash.com/photo-1550985616-10810253b84d?w=400&h=300&fit=crop"],
+    ["Phone Case Shockproof", 4.4, "Shockproof phone case for iPhone.", 19.99, 34.99, "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=400&h=300&fit=crop"],
+    ["Webcam HD 1080p", 4.6, "1080p HD webcam with microphone.", 59.99, 99.99, "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&h=300&fit=crop"],
+    ["Bluetooth Speaker", 4.5, "Portable waterproof speaker with 24-hour playtime.", 69.99, 109.99, "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=300&fit=crop"],
+    ["Wireless Mouse", 4.5, "Ergonomic wireless mouse with silent click.", 29.99, 49.99, "https://images.unsplash.com/photo-1527814050087-3793815479db?w=400&h=300&fit=crop"],
+    ["Laptop Stand", 4.7, "Ergonomic aluminium laptop stand.", 49.99, 79.99, "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&h=300&fit=crop"]
+  ];
+  electronics.forEach(([n, r, d, p, op, img]) => addProduct(n, "Electronics", r, d, p, op, img));
+
+  const fitness = [
+    ["Premium Yoga Mat", 4.7, "Non-slip yoga mat with carrying strap.", 45.99, 79.99, "https://images.unsplash.com/photo-1592432678016-e910b452f9a2?w=400&h=300&fit=crop"],
+    ["Fitness Dumbbells Set", 4.6, "Adjustable dumbbells set for home gym.", 149.99, 249.99, "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=300&fit=crop"],
+    ["Jump Rope Pro", 4.7, "Speed jump rope with adjustable length.", 19.99, 34.99, "https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=400&h=300&fit=crop"],
+    ["Treadmill Foldable", 4.8, "Foldable treadmill with LCD display.", 899.99, 1299.99, "https://images.unsplash.com/photo-1591290619762-f1c6b6c1c8a1?w=400&h=300&fit=crop"],
+    ["Gym Bag", 4.6, "Waterproof gym bag with shoe compartment.", 49.99, 89.99, "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop"],
+    ["Smart Scale BMI", 4.6, "Digital bathroom scale with BMI tracking.", 34.99, 59.99, "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=300&fit=crop"]
+  ];
+  fitness.forEach(([n, r, d, p, op, img]) => addProduct(n, "Fitness", r, d, p, op, img));
+
+  const fashion = [
+    ["Sunglasses Classic", 4.4, "UV400 polarized sunglasses for men and women.", 34.99, 59.99, "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=300&fit=crop"],
+    ["Leather Wallet", 4.7, "Genuine leather wallet with RFID protection.", 39.99, 69.99, "https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=300&fit=crop"],
+    ["Sneakers Classic", 4.7, "Classic white sneakers for men.", 79.99, 129.99, "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop"],
+    ["Handbag Leather", 4.8, "Genuine leather handbag for women.", 149.99, 249.99, "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=300&fit=crop"],
+    ["Watch Luxury", 4.9, "Luxury automatic watch for men.", 299.99, 449.99, "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=400&h=300&fit=crop"],
+    ["Backpack Leather", 4.7, "Genuine leather backpack for men.", 129.99, 199.99, "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop"]
+  ];
+  fashion.forEach(([n, r, d, p, op, img]) => addProduct(n, "Fashion", r, d, p, op, img));
+
+  const beauty = [
+    ["Skincare Set", 4.7, "Complete skincare set for glowing skin.", 59.99, 99.99, "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop"],
+    ["Perfume Luxury Men", 4.8, "Long-lasting luxury perfume for men.", 79.99, 129.99, "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=300&fit=crop"],
+    ["Makeup Kit", 4.6, "Complete makeup kit with brushes.", 79.99, 129.99, "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop"],
+    ["Beard Trimmer", 4.7, "Professional beard trimmer rechargeable.", 59.99, 99.99, "https://images.unsplash.com/photo-1621607512214-68297480165e?w=400&h=300&fit=crop"]
+  ];
+  beauty.forEach(([n, r, d, p, op, img]) => addProduct(n, "Beauty", r, d, p, op, img));
+
+  const home = [
+    ["Coffee Maker Auto", 4.6, "Automatic coffee maker with timer.", 129.99, 199.99, "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&h=300&fit=crop"],
+    ["Blender Pro", 4.5, "High-speed blender for smoothies and shakes.", 99.99, 159.99, "https://images.unsplash.com/photo-1585515320310-259814833e62?w=400&h=300&fit=crop"],
+    ["Air Fryer 5L", 4.7, "5L air fryer with digital touch screen.", 149.99, 249.99, "https://images.unsplash.com/photo-1626074353765-517a681e40be?w=400&h=300&fit=crop"],
+    ["Vacuum Cleaner Cordless", 4.6, "Cordless vacuum cleaner with HEPA filter.", 349.99, 499.99, "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"],
+    ["Knife Set Kitchen", 4.7, "Professional kitchen knife set with block.", 89.99, 149.99, "https://images.unsplash.com/photo-1593618998160-e34014e67546?w=400&h=300&fit=crop"]
+  ];
+  home.forEach(([n, r, d, p, op, img]) => addProduct(n, "Home", r, d, p, op, img));
+
+  const gaming = [
+    ["Gaming Headset RGB", 4.6, "Surround sound gaming headset with RGB.", 89.99, 149.99, "https://images.unsplash.com/photo-1599669454699-248893623440?w=400&h=300&fit=crop"],
+    ["Mechanical Keyboard RGB", 4.8, "RGB mechanical gaming keyboard.", 129.99, 199.99, "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&h=300&fit=crop"],
+    ["Gaming Chair Ergonomic", 4.7, "Ergonomic gaming chair with lumbar support.", 349.99, 499.99, "https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&h=300&fit=crop"],
+    ["VR Headset", 4.7, "Virtual reality headset for gaming.", 399.99, 599.99, "https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=400&h=300&fit=crop"]
+  ];
+  gaming.forEach(([n, r, d, p, op, img]) => addProduct(n, "Gaming", r, d, p, op, img));
+
+  const sports = [
+    ["Running Shoes Pro", 4.7, "Lightweight running shoes with air cushion.", 89.99, 149.99, "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop"],
+    ["Soccer Ball Pro", 4.6, "Professional soccer ball size 5.", 39.99, 69.99, "https://images.unsplash.com/photo-1614632537190-23e4146777db?w=400&h=300&fit=crop"],
+    ["Boxing Gloves", 4.6, "Professional boxing gloves 12oz.", 59.99, 99.99, "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=400&h=300&fit=crop"]
+  ];
+  sports.forEach(([n, r, d, p, op, img]) => addProduct(n, "Sports", r, d, p, op, img));
+
+  const photo = [
+    ["Camera DSLR Pro", 4.9, "Professional DSLR camera with 18-55mm lens.", 1499.99, 1999.99, "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=300&fit=crop"],
+    ["Gimbal Stabilizer", 4.7, "3-axis gimbal stabilizer for smartphones.", 199.99, 299.99, "https://images.unsplash.com/photo-1606986628253-05617e8a2d29?w=400&h=300&fit=crop"],
+    ["Action Camera 4K", 4.7, "4K action camera waterproof 30m.", 299.99, 449.99, "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=300&fit=crop"]
+  ];
+  photo.forEach(([n, r, d, p, op, img]) => addProduct(n, "Photography", r, d, p, op, img));
+
+  const productsGrid = document.getElementById('productsGrid');
+  const VISIBLE_COUNT = 8;
+  const REPLACE_COUNT = 4;
+  const REPLACE_INTERVAL = 5000;
+  let currentlyShown = [];
+  let shownProductIds = new Set();
+
+  function pickUniqueProducts(count) {
+    const available = allProducts.filter(p => !shownProductIds.has(p.id));
+    if (available.length < count) {
+      shownProductIds.clear();
+      currentlyShown.forEach(p => shownProductIds.add(p.id));
+      return allProducts.filter(p => !shownProductIds.has(p.id)).sort(() => 0.5 - Math.random()).slice(0, count);
+    }
+    return [...available].sort(() => 0.5 - Math.random()).slice(0, count);
+  }
+
+  function createProductCard(product) {
+    const safeName = product.name.replace(/'/g, "\\'");
+    return `
+      <div class="product-card fade-in" data-product-id="${product.id}">
+        <div class="product-card-image" onclick="openDetail(${product.id})">
+          <img src="${product.img}" alt="${product.name}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop'">
+          <span class="product-card-badge">In Stock</span>
+        </div>
+        <div class="product-card-body">
+          <div class="product-card-rating">
+            <span class="star">★</span><span>${product.rating}</span>
+            <span class="category">· ${product.category}</span>
+          </div>
+          <h3 class="product-card-title" onclick="openDetail(${product.id})">${product.name}</h3>
+          <p class="product-card-desc">${product.desc}</p>
+          <div class="product-card-stats">
+            <div class="product-stat"><span class="stat-icon">👁</span><span class="stat-value">${product.views.toLocaleString()}</span></div>
+            <div class="product-stat"><span class="stat-icon">🛒</span><span class="stat-value">${product.cart.toLocaleString()}</span></div>
+            <div class="product-stat"><span class="stat-icon">❤</span><span class="stat-value">${product.likes.toLocaleString()}</span></div>
+          </div>
+          <div class="product-card-price">
+            <span class="current">$${product.price.toFixed(2)}</span>
+            <span class="old">$${product.oldPrice.toFixed(2)}</span>
+          </div>
+          <div class="product-card-actions">
+            <button class="btn-ona-maelezo" onclick="event.stopPropagation(); openDetail(${product.id})">Ona Maelezo</button>
+            <button class="btn-weka-oda" onclick="event.stopPropagation(); wekaOda('${safeName}', ${product.price})">Weka Oda</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderInitialProducts() {
+    currentlyShown = pickUniqueProducts(VISIBLE_COUNT);
+    currentlyShown.forEach(p => shownProductIds.add(p.id));
+    productsGrid.innerHTML = currentlyShown.map(p => createProductCard(p)).join('');
+  }
+
+  function replaceFourProducts() {
+    const positions = [];
+    while (positions.length < REPLACE_COUNT) {
+      const pos = Math.floor(Math.random() * VISIBLE_COUNT);
+      if (!positions.includes(pos)) positions.push(pos);
+    }
+    const newProducts = pickUniqueProducts(REPLACE_COUNT);
+    newProducts.forEach(p => shownProductIds.add(p.id));
+    const cards = productsGrid.querySelectorAll('.product-card');
+    positions.forEach((pos, index) => {
+      const newProduct = newProducts[index];
+      currentlyShown[pos] = newProduct;
+      if (cards[pos]) {
+        const temp = document.createElement('div');
+        temp.innerHTML = createProductCard(newProduct);
+        cards[pos].replaceWith(temp.firstElementChild);
+      }
+    });
+    if (shownProductIds.size > allProducts.length * 0.8) {
+      setTimeout(() => {
+        shownProductIds.clear();
+        currentlyShown.forEach(p => shownProductIds.add(p.id));
+      }, 2000);
+    }
+  }
+
+  function initDynamicProducts() {
+    renderInitialProducts();
+    setInterval(() => replaceFourProducts(), REPLACE_INTERVAL);
+  }
+
+  const customerNames = [
+    'Amani John', 'Fatuma Ali', 'Joseph Mwita', 'Neema Joseph', 'Hassan Mwinyi',
+    'Grace Mushi', 'Daniel Kimaro', 'Zainab Salum', 'Peter Mwangi', 'Asha Hamisi'
+  ];
+  const orderStatuses = [
+    { label: 'IMELIPWA', class: 'paid' },
+    { label: 'INASUBIRI', class: 'pending' },
+    { label: 'IMESAFIRISHWA', class: 'shipped' }
+  ];
+  function generateRandomOrder() {
+    const orderNum = 1025 + Math.floor(Math.random() * 500);
+    const name = customerNames[Math.floor(Math.random() * customerNames.length)];
+    const amount = (Math.floor(Math.random() * 150) + 20) * 1000;
+    const status = orderStatuses[Math.floor(Math.random() * orderStatuses.length)];
+    return { orderNum, name, amount, status };
+  }
+  function renderRecentOrders() {
+    const tbody = document.getElementById('recentOrdersBody');
+    if (!tbody) return;
+    const orders = [];
+    for (let i = 0; i < 5; i++) orders.push(generateRandomOrder());
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td><strong>#${o.orderNum}</strong></td>
+        <td>${o.name}</td>
+        <td>TSh ${o.amount.toLocaleString()}</td>
+        <td><span class="badge-status ${o.status.class}">${o.status.label}</span></td>
+      </tr>
+    `).join('');
+  }
+  function initRecentOrders() {
+    renderRecentOrders();
+    setInterval(() => renderRecentOrders(), 8000);
+  }
+
+  const topProductIcons = ['👕', '👟', '⌚', '🎧', '📱', '💻', '🎮', '📷', '🎒', '💼'];
+  function generateRandomTopProduct() {
+    const icon = topProductIcons[Math.floor(Math.random() * topProductIcons.length)];
+    const product = allProducts[Math.floor(Math.random() * allProducts.length)];
+    const soldCount = Math.floor(Math.random() * 200) + 20;
+    const salesAmount = (Math.floor(Math.random() * 900) + 100) * 1000;
+    return { icon, name: product.name, soldCount, salesAmount };
+  }
+  function renderTopProducts() {
+    const container = document.getElementById('topProductsContainer');
+    if (!container) return;
+    const products = [];
+    for (let i = 0; i < 4; i++) products.push(generateRandomTopProduct());
+    container.innerHTML = products.map(p => `
+      <div class="top-product">
+        <div class="product-img">${p.icon}</div>
+        <div class="product-info"><h4>${p.name}</h4><p>Bidhaa ${p.soldCount} zimeuzwa</p></div>
+        <div class="product-sales">TSh ${p.salesAmount.toLocaleString()}</div>
+      </div>
+    `).join('');
+  }
+  function initTopProducts() {
+    renderTopProducts();
+    setInterval(() => renderTopProducts(), 8000);
+  }
+
+  function updateProductCount() {
+    const count = 200 + Math.floor(Math.random() * 300);
+    const el = document.getElementById('productCount');
+    if (el) el.textContent = count + ' bidhaa';
+  }
+  function initProductCount() {
+    updateProductCount();
+    setInterval(() => updateProductCount(), 5000);
+  }
+
+  function openHuduma() {
+    document.getElementById('hudumaModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeHudumaModal() {
+    document.getElementById('hudumaModal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function openWhatsApp() {
+    closeHudumaModal();
+    setTimeout(() => {
+      document.getElementById('smsErrorModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }, 200);
+  }
+  function closeSmsErrorModal() {
+    document.getElementById('smsErrorModal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function openSMS() {
+    const phone = '+255750910821';
+    const message = encodeURIComponent('Hi! TbayTech Ninahitaji msaada zaidi.');
+    window.location.href = 'sms:' + phone + '?body=' + message;
+    closeSmsErrorModal(); closeHudumaModal();
+  }
+  function openSMSFromError() { openSMS(); }
+  function openChannel() {
+    window.open('https://whatsapp.com/channel/0029VbDIBge2phHVrfI38y2B', '_blank');
+    closeSmsErrorModal(); closeHudumaModal();
+  }
+
+  function showDashboard(event) {
+    closeSidebar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    if (event) event.target.closest('a').classList.add('active');
+  }
+  function showBidhaa(event) {
+    closeSidebar();
+    document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    if (event) event.target.closest('a').classList.add('active');
+  }
+  function showOda(event) {
+    closeSidebar();
+    document.querySelector('#recentOrdersBody').closest('.dash-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    if (event) event.target.closest('a').classList.add('active');
+  }
+  function showRipoti(event) {
+    closeSidebar();
+    document.querySelector('.chart-container').closest('.dash-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    if (event) event.target.closest('a').classList.add('active');
+  }
+  function showMsaada(event) {
+    closeSidebar();
+    openHuduma();
+    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+    if (event) event.target.closest('a').classList.add('active');
+  }
+
+  function openDetail(productId) {
+    const product = allProducts.find(p => p.id === productId);
+    if (!product) return;
+    document.getElementById('detailPage').setAttribute('data-product-id', productId);
+    document.getElementById('detailImage').src = product.img;
+    document.getElementById('detailImage').alt = product.name;
+    document.getElementById('detailCategory').textContent = product.category;
+    document.getElementById('detailTitle').textContent = product.name;
+    document.getElementById('detailRating').textContent = product.rating;
+    document.getElementById('detailPrice').textContent = '$' + product.price.toFixed(2);
+    document.getElementById('detailOldPrice').textContent = '$' + product.oldPrice.toFixed(2);
+    document.getElementById('detailDesc').textContent = product.desc;
+    document.getElementById('detailViewers').textContent = product.views.toLocaleString();
+    document.getElementById('detailSold').textContent = product.cart.toLocaleString();
+    document.getElementById('detailLikes').textContent = product.likes.toLocaleString();
+    document.getElementById('detailRating2').textContent = product.rating;
+    const discount = Math.round((1 - product.price / product.oldPrice) * 100);
+    document.getElementById('detailDiscount').textContent = '-' + discount + '%';
+    document.getElementById('detailBtnWekaOda').onclick = function() {
+      wekaOda(product.name, product.price);
+    };
+    const heartBtn = document.getElementById('detailHeartBtn');
+    heartBtn.textContent = '♡';
+    heartBtn.style.color = '';
+    heartBtn.setAttribute('data-liked', 'false');
+    document.getElementById('detailPage').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDetail() {
+    document.getElementById('detailPage').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function toggleHeart(btn) {
+    const detailPage = document.getElementById('detailPage');
+    const currentProductId = parseInt(detailPage.getAttribute('data-product-id'));
+    const product = allProducts.find(p => p.id === currentProductId);
+    if (!product) return;
+    const isLiked = btn.getAttribute('data-liked') === 'true';
+    if (!isLiked) {
+      btn.textContent = '❤'; btn.style.color = '#ef4444';
+      btn.setAttribute('data-liked', 'true'); product.likes += 1;
+    } else {
+      btn.textContent = '♡'; btn.style.color = '';
+      btn.setAttribute('data-liked', 'false');
+      if (product.likes > 0) product.likes -= 1;
+    }
+    document.getElementById('detailLikes').textContent = product.likes.toLocaleString();
+  }
+  function nunuaSasa() { alert('Ununuzi wa haraka unafunguka...'); }
+  function shareProduct() {
+    const title = document.getElementById('detailTitle').textContent;
+    if (navigator.share) navigator.share({ title: title, text: 'Angalia bidhaa hii: ' + title });
+    else alert('Link ya bidhaa imenakiliwa!');
+  }
+
+  let currentOrderData = null;
+
+  function canPlaceOrder() {
+    const todayCount = getTodayOrderCount();
+    if (todayCount >= 1) {
+      alert('Kwa Sasa huwezi weka oda zaidi ya moja kwa siku, subiri mpaka kesho uweze weka oda mpya. Au ongea na mtoa huduma wetu akuwezeshee pro ili uweze weka oda zaidi ya moja kwa siku. Asante');
+      return false;
+    }
+    return true;
+  }
+
+  function wekaOda(jinaLaBidhaa, productPriceUsd) {
+    if (!canPlaceOrder()) return;
+
+    const payout = generatePayout();
+    const orderTsh = getOrderAmountTsh(productPriceUsd);
+    const orderUsd = parseFloat((orderTsh / EXCHANGE_RATE).toFixed(2));
+    currentOrderData = {
+      name: jinaLaBidhaa,
+      productPriceUsd: productPriceUsd,
+      usd: payout.usd,
+      tsh: payout.tsh,
+      orderUsd: orderUsd,
+      orderTsh: orderTsh
+    };
+    openPhoneModal();
+  }
+
+  function openPhoneModal() {
+    const modal = document.getElementById('phoneModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('phoneInput').classList.remove('error');
+    document.getElementById('phoneErrorMsg').classList.remove('show');
+    setTimeout(() => document.getElementById('phoneInput').focus(), 300);
+  }
+  function closePhoneModal() {
+    document.getElementById('phoneModal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function validatePhoneNumber(phone) {
+    const cleaned = phone.replace(/[\s\-()]/g, '');
+    return [/^0[67]\d{8}$/, /^255[67]\d{8}$/, /^\+255[67]\d{8}$/].some(p => p.test(cleaned));
+  }
+  function submitPhoneNumber() {
+    const input = document.getElementById('phoneInput');
+    const errorMsg = document.getElementById('phoneErrorMsg');
+    const phone = input.value.trim();
+    if (!phone || !validatePhoneNumber(phone)) {
+      input.classList.add('error'); errorMsg.classList.add('show');
+      setTimeout(() => input.classList.remove('error'), 500); return;
+    }
+    const cleanedPhone = phone.replace(/[\s\-()]/g, '');
+    currentOrderData.phone = cleanedPhone;
+    localStorage.setItem('tbaytech_phone', cleanedPhone);
+    initWebPush().then(() => saveSubscription(cleanedPhone));
+    closePhoneModal();
+    incrementTodayOrderCount();
+    document.getElementById('loadingPage').classList.add('show');
+    document.getElementById('successPage').classList.remove('show');
+    setTimeout(() => {
+      document.getElementById('loadingPage').classList.remove('show');
+      showSuccess();
+    }, 5000);
+  }
+  document.getElementById('phoneInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitPhoneNumber();
+  });
+
+  function showSuccess() {
+    if (!currentOrderData) return;
+    const { usd, tsh, orderUsd, orderTsh, phone, name } = currentOrderData;
+
+    recordPendingOrder({
+      name: name,
+      productPriceUsd: currentOrderData.productPriceUsd,
+      tsh: tsh,
+      usd: usd,
+      orderTsh: orderTsh,
+      orderUsd: orderUsd,
+      phone: phone
+    });
+
+    document.getElementById('successAmount').innerHTML =
+      'Umelipwa <span class="highlight">USD $' + usd.toFixed(2) + '</span> Sawa na <span class="highlight">TSh ' + tsh.toLocaleString() + '</span> kwa oda yako ya USD $' + orderUsd.toFixed(2) + '.';
+    document.getElementById('successUsdAgain').textContent = 'USD $' + orderUsd.toFixed(2);
+    document.getElementById('successTshAgain').textContent = 'TSh ' + orderTsh.toLocaleString();
+    addToBalance(tsh);
+    document.getElementById('successPage').classList.add('show');
+    document.getElementById('ordersTodayCount').textContent = getTodayOrderCount();
+    sendOrderNotification(phone, name, tsh);
+  }
+
+  async function sendOrderNotification(phone, orderName, payoutTsh) {
+    const smsNotif = document.getElementById('smsNotification');
+    const smsText = document.getElementById('smsText');
+    smsText.textContent = "Hongera! Oda Yako imepokelewa kikamilifu. Asante kwa kuichagua TbayTech.";
+    setTimeout(() => {
+      smsNotif.classList.add('show');
+      setTimeout(() => smsNotif.classList.remove('show'), 8000);
+    }, 1000);
+    try {
+      await fetch(BACKEND_URL + '/api/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, orderName, payoutTsh })
+      });
+    } catch (error) { console.error('❌', error); }
+  }
+
+  function closeSuccess() {
+    document.getElementById('successPage').classList.remove('show');
+    document.getElementById('detailPage').classList.remove('show');
+    document.body.style.overflow = '';
+    updateBalanceUI();
+  }
+
+  function goToWithdraw() {
+    closeSuccess();
+    setTimeout(() => {
+      const balanceCard = document.getElementById('balanceCard');
+      balanceCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      balanceCard.classList.add('highlight');
+      const withdrawBtn = document.getElementById('withdrawBtn');
+      withdrawBtn.classList.add('pulse');
+      setTimeout(() => balanceCard.classList.remove('highlight'), 3000);
+      setTimeout(() => withdrawBtn.classList.remove('pulse'), 6000);
+    }, 300);
+  }
+
+  function handleWithdraw() {
+    document.getElementById('withdrawCard1').style.display = 'block';
+    document.getElementById('withdrawCard2').style.display = 'none';
+    document.getElementById('withdrawCard3').style.display = 'none';
+    document.getElementById('withdrawBalanceDisplay').textContent = 'TSh ' + balanceTsh.toLocaleString();
+    document.getElementById('withdrawAmountInput').value = '';
+    document.getElementById('withdrawErrorMsg').classList.remove('show');
+    document.getElementById('withdrawModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeWithdrawModal() {
+    document.getElementById('withdrawModal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function formatNumberWithCommas(value) {
+    let num = value.replace(/\D/g, '');
+    if (num === '') return '';
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  document.getElementById('withdrawAmountInput').addEventListener('input', function() {
+    let cursorPos = this.selectionStart;
+    let oldValue = this.value;
+    let newValue = formatNumberWithCommas(oldValue);
+    if (oldValue !== newValue) {
+      let diff = newValue.length - oldValue.length;
+      this.value = newValue;
+      this.setSelectionRange(cursorPos + diff, cursorPos + diff);
+    }
+  });
+  function submitWithdrawAmount() {
+    const input = document.getElementById('withdrawAmountInput');
+    const errorMsg = document.getElementById('withdrawErrorMsg');
+    let amountStr = input.value.trim().replace(/,/g, '');
+    const amount = parseInt(amountStr);
+    errorMsg.classList.remove('show');
+    if (!amountStr || isNaN(amount) || amount <= 0) {
+      errorMsg.textContent = 'Tafadhali weka kiasi sahihi cha kutoa.';
+      errorMsg.classList.add('show'); return;
+    }
+    if (amount > balanceTsh) {
+      errorMsg.textContent = 'Hakikisha una pesa za kutosha kwenye balance yako. Salio lako ni TSh ' + balanceTsh.toLocaleString();
+      errorMsg.classList.add('show'); return;
+    }
+    document.getElementById('withdrawCard1').style.display = 'none';
+    document.getElementById('withdrawCard2').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('withdrawCard2').style.display = 'none';
+      document.getElementById('withdrawCard3').style.display = 'block';
+    }, 4000);
+  }
+  function funguaAccountFromWithdraw() {
+    closeWithdrawModal();
+    showRegisterPage();
+  }
+  function showWithdrawHistory() {
+    alert('Historia ya Kutoa Pesa:\n\n• TSh 13,000 — 25 Septemba 2026 — Imekamilika\n• TSh 26,000 — 20 Septemba 2026 — Imekamilika\n• TSh 9,100 — 15 Septemba 2026 — Imekamilika');
+  }
+
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+
+  let webPushSubscription = null;
+  async function initWebPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+    try {
+      const registration = await navigator.serviceWorker.register('sw.js');
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return null;
+      const response = await fetch(BACKEND_URL + '/api/vapid-public-key');
+      const { publicKey } = await response.json();
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
+      });
+      webPushSubscription = subscription;
+      return subscription;
+    } catch (error) { console.error('❌ Web Push:', error); return null; }
+  }
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  }
+  async function saveSubscription(phone) {
+    if (!webPushSubscription) return;
+    try {
+      await fetch(BACKEND_URL + '/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, subscription: webPushSubscription })
+      });
+    } catch (error) { console.error('❌', error); }
+  }
+
+  window.addEventListener('load', function() {
+    document.getElementById('homePage').classList.add('active');
+    document.getElementById('signupPage').classList.remove('active');
+    document.getElementById('dashboardLayout').style.display = 'none';
+
+    const completed = checkPendingOrders();
+
+    setInterval(() => {
+      const newCompleted = checkPendingOrders();
+      if (newCompleted) {
+        if (document.getElementById('dashboardLayout').style.display !== 'none') {
+          if (!document.getElementById('welcomeModal').classList.contains('show')) {
+            showCongratsPopup(newCompleted);
+            notifyUserOrderCompleted(newCompleted);
+          }
+        }
+      }
+    }, 60000);
+  });
+</script>
+
+</body>
+  </html>
