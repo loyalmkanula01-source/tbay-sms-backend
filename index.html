@@ -3481,12 +3481,7 @@
     closeSmsErrorModal(); closeHudumaModal();
   }
 
-  function showDashboard(event) {
-    closeSidebar();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-    if (event) event.target.closest('a').classList.add('active');
-  }
+  function showDashboard(event) { switchDashView('dashboard', event); }
   function showBidhaa(event) {
     closeSidebar();
     document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
