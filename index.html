@@ -3481,32 +3481,24 @@
     closeSmsErrorModal(); closeHudumaModal();
   }
 
-  function showDashboard(event) { switchDashView('dashboard', event); }
-  function showBidhaa(event) {
-    closeSidebar();
-    document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-    if (event) event.target.closest('a').classList.add('active');
+  function switchDashView(viewName, event) {
+  document.querySelectorAll('.dash-view').forEach(v => v.classList.remove('active'));
+  const targetView = document.getElementById('view-' + viewName);
+  if (targetView) targetView.classList.add('active');
+  document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+  if (event) {
+    const link = event.target.closest('a');
+    if (link) link.classList.add('active');
   }
-  function showOda(event) {
-    closeSidebar();
-    document.querySelector('#recentOrdersBody').closest('.dash-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-    if (event) event.target.closest('a').classList.add('active');
-  }
-  function showRipoti(event) {
-    closeSidebar();
-    document.querySelector('.chart-container').closest('.dash-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-    if (event) event.target.closest('a').classList.add('active');
-  }
-  function showMsaada(event) {
-    closeSidebar();
-    openHuduma();
-    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-    if (event) event.target.closest('a').classList.add('active');
-  }
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
+function showDashboard(event) { switchDashView('dashboard', event); }
+  function showBidhaa(event) { switchDashView('bidhaa', event); }
+  function showOda(event) { switchDashView('oda', event); }
+  function showRipoti(event) { switchDashView('ripoti', event); }
+  function showMsaada(event) { switchDashView('msaada', event); }
   function openDetail(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
