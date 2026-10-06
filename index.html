@@ -2588,7 +2588,7 @@
   function showPage(page, pushHistory = true) {
     document.getElementById('homePage').classList.remove('active');
     document.getElementById('signupPage').classList.remove('active');
-
+    document.getElementById('dashboardLayout').style.display = 'none';
     if (page === 'home') {
       document.getElementById('homePage').classList.add('active');
     } else if (page === 'signup') {
