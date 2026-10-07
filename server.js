@@ -17,10 +17,10 @@ const redis = new Redis({
 });
 
 // ============================================
-// VAPID KEYS
+// VAPID KEYS (Zinasafishwa kuondoa spaces na newlines)
 // ============================================
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const VAPID_PUBLIC_KEY = (process.env.VAPID_PUBLIC_KEY || '').trim().replace(/\s/g, '');
+const VAPID_PRIVATE_KEY = (process.env.VAPID_PRIVATE_KEY || '').trim().replace(/\s/g, '');
 
 webpush.setVapidDetails(
   'mailto:loyalmkanula01@gmail.com',
