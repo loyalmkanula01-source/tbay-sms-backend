@@ -173,6 +173,7 @@ app.post('/api/place-order', async (req, res) => {
         message: 'Odda imepokelewa. SMS 3 + Web Push 3 zitatumwa.'
     });
 });
+
 // ============================================
 // TEST ENDPOINT - Tuma notification moja
 // ============================================
@@ -185,7 +186,6 @@ app.post('/api/test-push', async (req, res) => {
 
     console.log(`🧪 Test notification kwa ${phone}`);
 
-    // Angalia kama subscription ipo
     const subscription = await redis.get(`sub:${phone}`);
     
     if (!subscription) {
@@ -199,7 +199,6 @@ app.post('/api/test-push', async (req, res) => {
 
     console.log(`✅ Subscription ipo kwa ${phone}`);
 
-    // Tuma notification
     try {
         const parsedSub = typeof subscription === 'string' ? JSON.parse(subscription) : subscription;
 
@@ -216,17 +215,30 @@ app.post('/api/test-push', async (req, res) => {
             phone: phone
         });
     } catch (error) {
-        console.error('❌ Kosa la test notification:', error.message);
+        console.error('❌ Kosa la test notification:', error.statusCode, error.body || error.message);
         res.json({ 
             success: false, 
-            error: error.message 
+            error: error.message,
+            statusCode: error.statusCode,
+            details: error.body || null
         });
     }
 });
 
 // ============================================
-// ANZISHA SERVER
+// FUTA SUBSCRIPTIONS ZOTE (RESET)
 // ============================================
+app.post('/api/clear-subscriptions', async (req, res) => {
+    try {
+        await redis.flushdb();
+        console.log('🗑️ Subscriptions zote zimefutwa kwenye Redis');
+        res.json({ success: true, message: 'Subscriptions zote zimefutwa kikamilifu.' });
+    } catch (error) {
+        console.error('❌ Kosa la kufuta subscriptions:', error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ============================================
 // ANZISHA SERVER
 // ============================================
