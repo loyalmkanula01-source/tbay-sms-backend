@@ -159,6 +159,10 @@ async function sendWebPush(phone, title, body) {
 // ============================================
 // UJUMBE WA SMS 1–4
 // ============================================
+function fmtTsh(n) {
+  return Number(n || 0).toLocaleString('en-US');
+}
+
 function buildMessage(step, order) {
   const jinaLako = cleanName(order.jinaLako) || 'Mteja';
   const { orderName, payoutTsh } = order;
@@ -178,9 +182,9 @@ function buildMessage(step, order) {
     };
   }
   if (step === 3) return {
-    sms: `Hongera ${jinaLako}! 🎉\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${completedTsh} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n👉 tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Hongera ${jinaLako}! 🎉\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n👉 tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
     title: '🎉 Odda Imenunuliwa!',
-    body: `Umelipwa TSh ${completedTsh}. Angalia akaunti yako.`,
+    body: `Umelipwa TSh ${fmtTsh(completedTsh)}. Angalia akaunti yako.`,
   };
   if (step === 4) return {
     sms: `Karibu tena ${jinaLako}! 👋\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n👉 tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
