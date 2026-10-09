@@ -18,6 +18,7 @@ const redis = new Redis({
 
 // Redis keys
 const K = {
+  wallet: (phone) => `wallet:${phone}`,     // HASH: balance, netProfit (TSh)
   customer: (phone) => `customer:${phone}`, // Jina la mteja katika Redis
   sub: (phone) => `sub:${phone}`,
   subs: 'subscribers',              // SET ya namba zote zenye subscription
@@ -161,6 +162,7 @@ async function sendWebPush(phone, title, body) {
 function buildMessage(step, order) {
   const jinaLako = cleanName(order.jinaLako) || 'Mteja';
   const { orderName, payoutTsh } = order;
+  const completedTsh = order.completedPayoutTsh ?? payoutTsh;
   if (step === 1) {
     return {
       sms: `Karibu TBay, ${jinaLako}! 🎉\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini — tunafurahi kukuhudumia!\n\nTBay Technologies`,
@@ -176,9 +178,9 @@ function buildMessage(step, order) {
     };
   }
   if (step === 3) return {
-    sms: `Hongera ${jinaLako}! 🎉\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${payoutTsh} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n👉 tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Hongera ${jinaLako}! 🎉\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${completedTsh} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n👉 tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
     title: '🎉 Odda Imenunuliwa!',
-    body: `Umelipwa TSh ${order.payoutTsh}. Angalia akaunti yako.`,
+    body: `Umelipwa TSh ${completedTsh}. Angalia akaunti yako.`,
   };
   if (step === 4) return {
     sms: `Karibu tena ${jinaLako}! 👋\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n👉 tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
@@ -187,10 +189,28 @@ function buildMessage(step, order) {
 }
 
 // Tuma hatua moja (1,2,3,4) ya oda na urekodi matokeo
+function toTsh(v) {
+  return Math.max(0, parseInt(String(v ?? '').replace(/[^0-9]/g, ''), 10) || 0);
+}
+
 async function runStep(orderId, step, attempt) {
   const order = parse(await redis.get(K.order(orderId)));
   if (!order) return { smsSent: false, error: 'order_not_found' };
   if (!cleanName(order.jinaLako)) order.jinaLako = await resolveCustomerName(order.phone);
+  // Dakika 50: oda imenunuliwa — ongeza TSh Z kwenye Balance na Net Profit (mara moja tu)
+  if (step === 3 && !order.completedCredited) {
+    const z = toTsh(order.completedPayoutTsh ?? order.payoutTsh);
+    const wp = order.walletPhone || order.phone;
+    try {
+      if (z > 0) {
+        await redis.hincrby(K.wallet(wp), 'balance', z);
+        await redis.hincrby(K.wallet(wp), 'netProfit', z);
+      }
+      order.completedCredited = true;
+      await redis.set(K.order(orderId), JSON.stringify(order));
+      console.log(`💰 +TSh ${z} kwa ${wp} (oda ${orderId} imenunuliwa)`);
+    } catch (e) { console.error('❌ Wallet (SMS 3):', e.message); }
+  }
   const msg = buildMessage(step, order);
 
   const sms = await sendSms(order.phone, msg.sms);
@@ -306,14 +326,27 @@ app.post('/api/subscribe', async (req, res) => {
 app.post('/api/place-order', async (req, res) => {
   const phone = normalizePhone(req.body.phone);
   const { orderName, payoutTsh } = req.body;
+  const completedPayoutTsh = req.body.completedPayoutTsh ?? payoutTsh;
   if (!phone) return res.status(400).json({ error: 'Namba inahitajika' });
 
   const orderId = newId();
   const now = Date.now();
   const jinaLako = await resolveCustomerName(phone, req.body.jinaLako);
-  const order = { orderId, phone, jinaLako, orderName, payoutTsh, createdAt: new Date(now).toISOString(), sms: {} };
+  const walletPhone = normalizePhone(req.body.accountPhone) || phone;
+  const order = { orderId, phone, walletPhone, jinaLako, orderName, payoutTsh, completedPayoutTsh, completedCredited: false, createdAt: new Date(now).toISOString(), sms: {} };
   await redis.set(K.order(orderId), JSON.stringify(order));
   console.log(`📦 Odda mpya ${orderId} kutoka ${phone}`);
+
+  // Ongeza malipo kwenye Balance na Net Profit ya mteja (kwa namba ya akaunti)
+  const amount = Math.max(0, parseInt(String(payoutTsh).replace(/[^0-9]/g, ''), 10) || 0);
+  let wallet = null;
+  try {
+    if (amount > 0) {
+      await redis.hincrby(K.wallet(walletPhone), 'balance', amount);
+      await redis.hincrby(K.wallet(walletPhone), 'netProfit', amount);
+    }
+    wallet = await getWallet(walletPhone);
+  } catch (e) { console.error('❌ Wallet:', e.message); }
 
   // Hifadhi SMS 2, 3 na 4 kabla ya kuwasiliana na Beem.
   await enqueue(orderId, 2, now + SMS2_DELAY_MS);
@@ -329,8 +362,22 @@ app.post('/api/place-order', async (req, res) => {
     orderId,
     smsSent: first.smsSent,
     error: first.smsSent ? null : first.error,
+    wallet,
     message: 'Oda imepokelewa. SMS 2, 3 na 4 zimepangwa.',
   });
+});
+
+async function getWallet(phone) {
+  const w = (await redis.hgetall(K.wallet(phone))) || {};
+  return { phone, balance: parseInt(w.balance, 10) || 0, netProfit: parseInt(w.netProfit, 10) || 0 };
+}
+
+// Balance na Net Profit ya mteja mmoja (mteja mpya = 0)
+app.get('/api/wallet', async (req, res) => {
+  const phone = normalizePhone(req.query.phone);
+  if (!phone) return res.status(400).json({ error: 'Namba inahitajika' });
+  try { res.json(await getWallet(phone)); }
+  catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 // Hali ya oda moja (SMS 1/2/3/4 smsSent true/false)
