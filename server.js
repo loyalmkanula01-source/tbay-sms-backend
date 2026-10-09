@@ -18,11 +18,12 @@ const redis = new Redis({
 
 // Redis keys
 const K = {
+  customer: (phone) => `customer:${phone}`, // Jina la mteja katika Redis
   sub: (phone) => `sub:${phone}`,
   subs: 'subscribers',              // SET ya namba zote zenye subscription
   queue: 'sms:queue',               // ZSET: member=jobId, score=muda wa kutuma (ms)
   job: (id) => `sms:job:${id}`,     // JSON ya kazi moja
-  order: (id) => `order:${id}`,     // JSON ya oda + hali ya SMS 3
+  order: (id) => `order:${id}`,     // JSON ya oda + hali ya SMS 1–4
   history: 'sms:history',           // LIST ya SMS zote (mpya kwanza)
   phoneHistory: (p) => `sms:history:${p}`,
   cronLock: 'sms:cron:lock',
@@ -34,6 +35,7 @@ const RETRY_DELAY_MS = 2 * 60 * 1000;
 const BATCH_SIZE = 20;
 const SMS2_DELAY_MS = 10 * 60 * 1000;
 const SMS3_DELAY_MS = 50 * 60 * 1000;
+const SMS4_DELAY_MS = 24 * 60 * 60 * 1000;
 
 // Siri ya cron/admin (weka CRON_SECRET kwenye Render env)
 const CRON_SECRET = process.env.CRON_SECRET || '';
@@ -72,6 +74,20 @@ function normalizePhone(phone) {
 }
 const parse = (v) => (v == null ? null : typeof v === 'string' ? JSON.parse(v) : v);
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+function cleanName(value) {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, 120) : '';
+}
+
+async function resolveCustomerName(phone, suppliedName) {
+  const jinaLako = cleanName(suppliedName);
+  if (jinaLako) {
+    await redis.set(K.customer(phone), JSON.stringify({ phone, jinaLako, updatedAt: new Date().toISOString() }));
+    return jinaLako;
+  }
+  const customer = parse(await redis.get(K.customer(phone)));
+  return cleanName(customer?.jinaLako) || cleanName(customer?.fullName) || cleanName(customer?.name) || 'Mteja';
+}
 
 async function logHistory(entry) {
   const row = JSON.stringify(entry);
@@ -140,38 +156,46 @@ async function sendWebPush(phone, title, body) {
 }
 
 // ============================================
-// UJUMBE WA SMS 3
+// UJUMBE WA SMS 1–4
 // ============================================
 function buildMessage(step, order) {
+  const jinaLako = cleanName(order.jinaLako) || 'Mteja';
+  const { orderName, payoutTsh } = order;
   if (step === 1) {
     return {
-      sms: 'Hongera! Odda Yako imepokelewa kikamilifu utaendelea kupokea Taharifa kuhusu odda yako mpaka itakaponunuliwa. Asante kwa kuichagua TBay Technologies',
+      sms: `Karibu TBay, ${jinaLako}! 🎉\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini — tunafurahi kukuhudumia!\n\nTBay Technologies`,
       title: '🛒 Odda Imepokelewa!',
       body: 'Hongera! Odda yako imepokelewa kikamilifu.',
     };
   }
   if (step === 2) {
     return {
-      sms: `Habari! Odda yako ya ${order.orderName} imesafirishwa. Itafika hivi karibuni. Asante kwa kutumia TBay Technologies.`,
+      sms: `Habari ${jinaLako}!\n\nOda yako ya ${orderName} imesafirishwa. Itafika hivi karibuni.\n\nTunashukuru kwa kutumia TBay Technologies.\n\nKwa msaada WhatsApp: +255 750 910 821`,
       title: '🚚 Odda Imesafirishwa!',
       body: `Odda yako ya ${order.orderName} imesafirishwa.`,
     };
   }
-  return {
-    sms: `Hongera! Odda yako imenunuliwa kikamilifu. Umelipwa asilimia 20 ya odda yako sawa na TSh ${order.payoutTsh}. Tembelea akaunti yako ya TBay kuthibitisha malipo yako. Asante.`,
+  if (step === 3) return {
+    sms: `Hongera ${jinaLako}! 🎉\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${payoutTsh} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n👉 tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
     title: '🎉 Odda Imenunuliwa!',
     body: `Umelipwa TSh ${order.payoutTsh}. Angalia akaunti yako.`,
   };
+  if (step === 4) return {
+    sms: `Karibu tena ${jinaLako}! 👋\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n👉 tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
+  };
+  throw new Error('invalid_sms_step');
 }
 
-// Tuma hatua moja (1,2,3) ya oda na urekodi matokeo
+// Tuma hatua moja (1,2,3,4) ya oda na urekodi matokeo
 async function runStep(orderId, step, attempt) {
   const order = parse(await redis.get(K.order(orderId)));
   if (!order) return { smsSent: false, error: 'order_not_found' };
+  if (!cleanName(order.jinaLako)) order.jinaLako = await resolveCustomerName(order.phone);
   const msg = buildMessage(step, order);
 
   const sms = await sendSms(order.phone, msg.sms);
-  const push = await sendWebPush(order.phone, msg.title, msg.body);
+  // SMS 4 pekee; arifa za Web Push 1–3 hazibadilishwi.
+  const push = step === 4 ? { pushSent: false } : await sendWebPush(order.phone, msg.title, msg.body);
 
   order.sms[step] = {
     smsSent: sms.smsSent,
@@ -267,6 +291,7 @@ app.post('/api/subscribe', async (req, res) => {
   const phone = normalizePhone(req.body.phone);
   if (!phone || !subscription) return res.status(400).json({ error: 'Phone na subscription vinahitajika' });
   try {
+    if (cleanName(req.body.jinaLako)) await resolveCustomerName(phone, req.body.jinaLako);
     await redis.set(K.sub(phone), JSON.stringify(subscription));
     await redis.sadd(K.subs, phone);
     const total = await redis.scard(K.subs);
@@ -285,28 +310,30 @@ app.post('/api/place-order', async (req, res) => {
 
   const orderId = newId();
   const now = Date.now();
-  const order = { orderId, phone, orderName, payoutTsh, createdAt: new Date(now).toISOString(), sms: {} };
+  const jinaLako = await resolveCustomerName(phone, req.body.jinaLako);
+  const order = { orderId, phone, jinaLako, orderName, payoutTsh, createdAt: new Date(now).toISOString(), sms: {} };
   await redis.set(K.order(orderId), JSON.stringify(order));
   console.log(`📦 Odda mpya ${orderId} kutoka ${phone}`);
 
-  // SMS 1 papo hapo
-  const first = await runStep(orderId, 1, 1);
-  if (!first.smsSent) await enqueue(orderId, 1, now + RETRY_DELAY_MS, 2);
-
-  // SMS 2 na 3 zinahifadhiwa Redis — zinatumwa na cron hata server ikilala
+  // Hifadhi SMS 2, 3 na 4 kabla ya kuwasiliana na Beem.
   await enqueue(orderId, 2, now + SMS2_DELAY_MS);
   await enqueue(orderId, 3, now + SMS3_DELAY_MS);
+  await enqueue(orderId, 4, now + SMS4_DELAY_MS);
+
+  // Website inasubiri sekunde 5 kabla ya POST; hapa SMS 1 inatumwa papo hapo.
+  const first = await runStep(orderId, 1, 1);
+  if (!first.smsSent) await enqueue(orderId, 1, now + RETRY_DELAY_MS, 2);
 
   res.json({
     success: true,
     orderId,
     smsSent: first.smsSent,
     error: first.smsSent ? null : first.error,
-    message: 'Odda imepokelewa. SMS 2 na 3 zimepangwa.',
+    message: 'Oda imepokelewa. SMS 2, 3 na 4 zimepangwa.',
   });
 });
 
-// Hali ya oda moja (SMS 1/2/3 smsSent true/false)
+// Hali ya oda moja (SMS 1/2/3/4 smsSent true/false)
 app.get('/api/order-status/:id', async (req, res) => {
   const order = parse(await redis.get(K.order(req.params.id)));
   if (!order) return res.status(404).json({ error: 'Oda haipo' });
