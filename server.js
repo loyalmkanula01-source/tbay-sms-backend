@@ -16,236 +16,369 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
+// Redis keys
+const K = {
+  sub: (phone) => `sub:${phone}`,
+  subs: 'subscribers',              // SET ya namba zote zenye subscription
+  queue: 'sms:queue',               // ZSET: member=jobId, score=muda wa kutuma (ms)
+  job: (id) => `sms:job:${id}`,     // JSON ya kazi moja
+  order: (id) => `order:${id}`,     // JSON ya oda + hali ya SMS 3
+  history: 'sms:history',           // LIST ya SMS zote (mpya kwanza)
+  phoneHistory: (p) => `sms:history:${p}`,
+  cronLock: 'sms:cron:lock',
+};
+
+const HISTORY_LIMIT = 500;
+const MAX_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 2 * 60 * 1000;
+const BATCH_SIZE = 20;
+const SMS2_DELAY_MS = 10 * 60 * 1000;
+const SMS3_DELAY_MS = 50 * 60 * 1000;
+
+// Siri ya cron/admin (weka CRON_SECRET kwenye Render env)
+const CRON_SECRET = process.env.CRON_SECRET || '';
+function checkSecret(req, res) {
+  const key = req.query.key || req.headers['x-cron-key'];
+  if (!CRON_SECRET || key !== CRON_SECRET) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+
 // ============================================
-// VAPID KEYS (Zinasafishwa kuondoa spaces na newlines)
+// VAPID KEYS
 // ============================================
 const VAPID_PUBLIC_KEY = (process.env.VAPID_PUBLIC_KEY || '').trim().replace(/\s/g, '');
 const VAPID_PRIVATE_KEY = (process.env.VAPID_PRIVATE_KEY || '').trim().replace(/\s/g, '');
-
-webpush.setVapidDetails(
-  'mailto:loyalmkanula01@gmail.com',
-  VAPID_PUBLIC_KEY,
-  VAPID_PRIVATE_KEY
-);
+webpush.setVapidDetails('mailto:loyalmkanula01@gmail.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 // ============================================
-// BEEM SMS CONFIG
+// BEEM CONFIG
 // ============================================
 const BEEM_API_KEY = process.env.BEEM_API_KEY;
 const BEEM_SECRET_KEY = process.env.BEEM_SECRET_KEY;
 const BEEM_SENDER_NAME = process.env.BEEM_SENDER_NAME || 'INFO';
+const beemAuth = () => Buffer.from(`${BEEM_API_KEY}:${BEEM_SECRET_KEY}`).toString('base64');
 
 // ============================================
-// SMS FUNCTION
+// HELPERS
+// ============================================
+function normalizePhone(phone) {
+  let p = String(phone || '').replace(/[\s\-()]/g, '');
+  if (p.startsWith('+')) p = p.substring(1);
+  if (p.startsWith('0')) p = '255' + p.substring(1);
+  return p;
+}
+const parse = (v) => (v == null ? null : typeof v === 'string' ? JSON.parse(v) : v);
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+async function logHistory(entry) {
+  const row = JSON.stringify(entry);
+  await redis.lpush(K.history, row);
+  await redis.ltrim(K.history, 0, HISTORY_LIMIT - 1);
+  await redis.lpush(K.phoneHistory(entry.phone), row);
+  await redis.ltrim(K.phoneHistory(entry.phone), 0, 99);
+}
+
+// ============================================
+// SMS FUNCTION — inarudisha smsSent true/false + sababu
 // ============================================
 async function sendSms(phone, message) {
-    try {
-        let cleanPhone = phone.replace(/[\s\-()]/g, '');
-        if (cleanPhone.startsWith('0')) cleanPhone = '255' + cleanPhone.substring(1);
-        if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
-
-        const auth = Buffer.from(`${BEEM_API_KEY}:${BEEM_SECRET_KEY}`).toString('base64');
-
-        await axios.post(
-            'https://apisms.beem.africa/v1/send',
-            {
-                source_addr: BEEM_SENDER_NAME,
-                schedule_time: '',
-                encoding: 0,
-                message: message,
-                recipients: [{ recipient_id: 1, dest_addr: cleanPhone }]
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${auth}`
-                }
-            }
-        );
-        console.log(`✅ SMS imetumwa kwa ${cleanPhone}`);
-        return { success: true };
-    } catch (error) {
-        console.error('❌ Kosa la SMS:', error.response?.data || error.message);
-        return { success: false };
+  const cleanPhone = normalizePhone(phone);
+  try {
+    const { data } = await axios.post(
+      'https://apisms.beem.africa/v1/send',
+      {
+        source_addr: BEEM_SENDER_NAME,
+        schedule_time: '',
+        encoding: 0,
+        message,
+        recipients: [{ recipient_id: 1, dest_addr: cleanPhone }],
+      },
+      {
+        headers: { 'Content-Type': 'application/json', Authorization: `Basic ${beemAuth()}` },
+        timeout: 15000,
+      }
+    );
+    // Beem hujibu { successful: true, request_id, code: 100, valid, invalid, duplicates }
+    const ok = data && (data.successful === true || data.code === 100) && (data.invalid || 0) === 0;
+    if (ok) {
+      console.log(`✅ SMS imetumwa kwa ${cleanPhone} (request_id: ${data.request_id})`);
+      return { smsSent: true, requestId: data.request_id || null, beem: data };
     }
+    console.error(`❌ Beem imekataa SMS kwa ${cleanPhone}:`, data);
+    return { smsSent: false, error: data?.message || 'Beem rejected', beem: data };
+  } catch (error) {
+    const err = error.response?.data || error.message;
+    console.error(`❌ Kosa la SMS kwa ${cleanPhone}:`, err);
+    return { smsSent: false, error: typeof err === 'string' ? err : JSON.stringify(err) };
+  }
 }
 
 // ============================================
 // WEB PUSH FUNCTION
 // ============================================
 async function sendWebPush(phone, title, body) {
-    try {
-        const subscription = await redis.get(`sub:${phone}`);
-        
-        if (!subscription) {
-            console.log(`⚠️ Hakuna subscription kwa ${phone}`);
-            return { success: false, reason: 'no_subscription' };
-        }
-
-        const parsedSub = typeof subscription === 'string' ? JSON.parse(subscription) : subscription;
-
-        await webpush.sendNotification(parsedSub, JSON.stringify({
-            title: title,
-            body: body,
-            icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png'
-        }));
-        console.log(`✅ Web Push imetumwa kwa ${phone}`);
-        return { success: true };
-    } catch (error) {
-        console.error('❌ Kosa la Web Push:', error.message);
-        if (error.statusCode === 410 || error.statusCode === 404) {
-            await redis.del(`sub:${phone}`);
-        }
-        return { success: false };
+  try {
+    const sub = parse(await redis.get(K.sub(phone)));
+    if (!sub) return { pushSent: false, reason: 'no_subscription' };
+    await webpush.sendNotification(
+      sub,
+      JSON.stringify({ title, body, icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png' })
+    );
+    console.log(`✅ Web Push imetumwa kwa ${phone}`);
+    return { pushSent: true };
+  } catch (error) {
+    console.error('❌ Kosa la Web Push:', error.message);
+    if (error.statusCode === 410 || error.statusCode === 404) {
+      await redis.del(K.sub(phone));
+      await redis.srem(K.subs, phone);
     }
+    return { pushSent: false, reason: error.message };
+  }
 }
+
+// ============================================
+// UJUMBE WA SMS 3
+// ============================================
+function buildMessage(step, order) {
+  if (step === 1) {
+    return {
+      sms: 'Hongera! Odda Yako imepokelewa kikamilifu utaendelea kupokea Taharifa kuhusu odda yako mpaka itakaponunuliwa. Asante kwa kuichagua TBay Technologies',
+      title: '🛒 Odda Imepokelewa!',
+      body: 'Hongera! Odda yako imepokelewa kikamilifu.',
+    };
+  }
+  if (step === 2) {
+    return {
+      sms: `Habari! Odda yako ya ${order.orderName} imesafirishwa. Itafika hivi karibuni. Asante kwa kutumia TBay Technologies.`,
+      title: '🚚 Odda Imesafirishwa!',
+      body: `Odda yako ya ${order.orderName} imesafirishwa.`,
+    };
+  }
+  return {
+    sms: `Hongera! Odda yako imenunuliwa kikamilifu. Umelipwa asilimia 20 ya odda yako sawa na TSh ${order.payoutTsh}. Tembelea akaunti yako ya TBay kuthibitisha malipo yako. Asante.`,
+    title: '🎉 Odda Imenunuliwa!',
+    body: `Umelipwa TSh ${order.payoutTsh}. Angalia akaunti yako.`,
+  };
+}
+
+// Tuma hatua moja (1,2,3) ya oda na urekodi matokeo
+async function runStep(orderId, step, attempt) {
+  const order = parse(await redis.get(K.order(orderId)));
+  if (!order) return { smsSent: false, error: 'order_not_found' };
+  const msg = buildMessage(step, order);
+
+  const sms = await sendSms(order.phone, msg.sms);
+  const push = await sendWebPush(order.phone, msg.title, msg.body);
+
+  order.sms[step] = {
+    smsSent: sms.smsSent,
+    pushSent: push.pushSent,
+    attempts: attempt,
+    requestId: sms.requestId || null,
+    error: sms.error || null,
+    at: new Date().toISOString(),
+  };
+  await redis.set(K.order(orderId), JSON.stringify(order));
+
+  await logHistory({
+    orderId,
+    phone: order.phone,
+    step,
+    message: msg.sms,
+    smsSent: sms.smsSent,
+    pushSent: push.pushSent,
+    attempt,
+    requestId: sms.requestId || null,
+    error: sms.error || null,
+    at: new Date().toISOString(),
+  });
+  return sms;
+}
+
+async function enqueue(orderId, step, dueAt, attempt = 1) {
+  const jobId = `${orderId}:${step}:${attempt}`;
+  await redis.set(K.job(jobId), JSON.stringify({ orderId, step, attempt }));
+  await redis.zadd(K.queue, { score: dueAt, member: jobId });
+}
+
+// ============================================
+// CRON — inachakata SMS zilizofika muda wake
+// ============================================
+async function processDueJobs() {
+  // Lock moja tu kwa wakati mmoja (inaisha baada ya sekunde 55)
+  const got = await redis.set(K.cronLock, '1', { nx: true, ex: 55 });
+  if (!got) return { skipped: 'locked' };
+
+  const results = [];
+  try {
+    const due = await redis.zrange(K.queue, 0, Date.now(), { byScore: true, offset: 0, count: BATCH_SIZE });
+    for (const jobId of due) {
+      // Dai kazi — zrem inarudisha 1 kwa mchakataji mmoja tu
+      const claimed = await redis.zrem(K.queue, jobId);
+      if (!claimed) continue;
+      const job = parse(await redis.get(K.job(jobId)));
+      await redis.del(K.job(jobId));
+      if (!job) continue;
+
+      const r = await runStep(job.orderId, job.step, job.attempt);
+      if (!r.smsSent && job.attempt < MAX_ATTEMPTS && r.error !== 'order_not_found') {
+        await enqueue(job.orderId, job.step, Date.now() + RETRY_DELAY_MS, job.attempt + 1);
+      }
+      results.push({ jobId, smsSent: r.smsSent });
+    }
+  } finally {
+    await redis.del(K.cronLock);
+  }
+  return { processed: results.length, results };
+}
+
+// Wakati server iko macho, angalia kila dakika
+setInterval(() => {
+  processDueJobs().catch((e) => console.error('❌ Cron error:', e.message));
+}, 60 * 1000);
 
 // ============================================
 // ROUTES
 // ============================================
 app.get('/', async (req, res) => {
-    try {
-        const count = await redis.dbsize();
-        res.json({ 
-            status: 'TBay Backend is running!',
-            sms: 'Beem',
-            webpush: 'Enabled',
-            database: 'Upstash Redis',
-            subscribers: count
-        });
-    } catch (e) {
-        res.json({ status: 'TBay Backend is running!', error: e.message });
-    }
+  try {
+    const subscribers = await redis.scard(K.subs);
+    const pending = await redis.zcard(K.queue);
+    res.json({
+      status: 'TBay Backend is running!',
+      sms: 'Beem',
+      webpush: 'Enabled',
+      database: 'Upstash Redis',
+      subscribers,
+      pendingSms: pending,
+    });
+  } catch (e) {
+    res.json({ status: 'TBay Backend is running!', error: e.message });
+  }
 });
 
-app.get('/api/vapid-public-key', (req, res) => {
-    res.json({ publicKey: VAPID_PUBLIC_KEY });
-});
+app.get('/api/vapid-public-key', (req, res) => res.json({ publicKey: VAPID_PUBLIC_KEY }));
 
 app.post('/api/subscribe', async (req, res) => {
-    const { phone, subscription } = req.body;
-    
-    if (!phone || !subscription) {
-        return res.status(400).json({ error: 'Phone na subscription vinahitajika' });
-    }
-
-    try {
-        await redis.set(`sub:${phone}`, JSON.stringify(subscription));
-        
-        const count = await redis.dbsize();
-        console.log(`✅ Mteja amejisajili: ${phone} (Jumla: ${count})`);
-
-        res.json({ 
-            success: true, 
-            message: 'Umejisajili kwa notifications',
-            total: count
-        });
-    } catch (error) {
-        console.error('❌ Kosa la kuhifadhi:', error);
-        res.status(500).json({ error: error.message });
-    }
+  const { subscription } = req.body;
+  const phone = normalizePhone(req.body.phone);
+  if (!phone || !subscription) return res.status(400).json({ error: 'Phone na subscription vinahitajika' });
+  try {
+    await redis.set(K.sub(phone), JSON.stringify(subscription));
+    await redis.sadd(K.subs, phone);
+    const total = await redis.scard(K.subs);
+    console.log(`✅ Mteja amejisajili: ${phone} (Jumla: ${total})`);
+    res.json({ success: true, message: 'Umejisajili kwa notifications', total });
+  } catch (error) {
+    console.error('❌ Kosa la kuhifadhi:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.post('/api/place-order', async (req, res) => {
-    const { phone, orderName, payoutTsh } = req.body;
-    if (!phone) return res.status(400).json({ error: 'Namba inahitajika' });
+  const phone = normalizePhone(req.body.phone);
+  const { orderName, payoutTsh } = req.body;
+  if (!phone) return res.status(400).json({ error: 'Namba inahitajika' });
 
-    console.log(`📦 Odda mpya kutoka ${phone}`);
+  const orderId = newId();
+  const now = Date.now();
+  const order = { orderId, phone, orderName, payoutTsh, createdAt: new Date(now).toISOString(), sms: {} };
+  await redis.set(K.order(orderId), JSON.stringify(order));
+  console.log(`📦 Odda mpya ${orderId} kutoka ${phone}`);
 
-    const sms1 = "Hongera! Odda Yako imepokelewa kikamilifu utaendelea kupokea Taharifa kuhusu odda yako mpaka itakaponunuliwa. Asante kwa kuichagua TBay Technologies";
-    await sendSms(phone, sms1);
-    await sendWebPush(phone, '🛒 Odda Imepokelewa!', 'Hongera! Odda yako imepokelewa kikamilifu.');
+  // SMS 1 papo hapo
+  const first = await runStep(orderId, 1, 1);
+  if (!first.smsSent) await enqueue(orderId, 1, now + RETRY_DELAY_MS, 2);
 
-    setTimeout(async () => {
-        const sms2 = `Habari! Odda yako ya ${orderName} imesafirishwa. Itafika hivi karibuni. Asante kwa kutumia TBay Technologies.`;
-        await sendSms(phone, sms2);
-        await sendWebPush(phone, '🚚 Odda Imesafirishwa!', `Odda yako ya ${orderName} imesafirishwa.`);
-    }, 10 * 60 * 1000);
+  // SMS 2 na 3 zinahifadhiwa Redis — zinatumwa na cron hata server ikilala
+  await enqueue(orderId, 2, now + SMS2_DELAY_MS);
+  await enqueue(orderId, 3, now + SMS3_DELAY_MS);
 
-    setTimeout(async () => {
-        const sms3 = `Hongera! Odda yako imenunuliwa kikamilifu. Umelipwa asilimia 20 ya odda yako sawa na TSh ${payoutTsh}. Tembelea akaunti yako ya TBay kuthibitisha malipo yako. Asante.`;
-        await sendSms(phone, sms3);
-        await sendWebPush(phone, '🎉 Odda Imenunuliwa!', `Umelipwa TSh ${payoutTsh}. Angalia akaunti yako.`);
-    }, 50 * 60 * 1000);
+  res.json({
+    success: true,
+    orderId,
+    smsSent: first.smsSent,
+    error: first.smsSent ? null : first.error,
+    message: 'Odda imepokelewa. SMS 2 na 3 zimepangwa.',
+  });
+});
 
-    res.json({ 
-        success: true, 
-        message: 'Odda imepokelewa. SMS 3 + Web Push 3 zitatumwa.'
+// Hali ya oda moja (SMS 1/2/3 smsSent true/false)
+app.get('/api/order-status/:id', async (req, res) => {
+  const order = parse(await redis.get(K.order(req.params.id)));
+  if (!order) return res.status(404).json({ error: 'Oda haipo' });
+  res.json(order);
+});
+
+// Cron ya nje (cron-job.org) — piga kila dakika 1
+app.all('/api/cron/process-sms', async (req, res) => {
+  if (!checkSecret(req, res)) return;
+  try {
+    res.json(await processDueJobs());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Salio la Beem
+app.get('/api/beem-balance', async (req, res) => {
+  if (!checkSecret(req, res)) return;
+  try {
+    const { data } = await axios.get('https://apisms.beem.africa/public/v1/vendors/balance', {
+      headers: { Authorization: `Basic ${beemAuth()}` },
+      timeout: 15000,
     });
+    res.json({ success: true, credits: data?.data?.credit_balance ?? null, raw: data });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.response?.data || e.message });
+  }
+});
+
+// Historia ya SMS (zote au kwa namba moja)
+app.get('/api/sms-history', async (req, res) => {
+  if (!checkSecret(req, res)) return;
+  const limit = Math.min(parseInt(req.query.limit, 10) || 50, HISTORY_LIMIT);
+  const key = req.query.phone ? K.phoneHistory(normalizePhone(req.query.phone)) : K.history;
+  const rows = await redis.lrange(key, 0, limit - 1);
+  const items = rows.map(parse);
+  res.json({
+    total: items.length,
+    sent: items.filter((r) => r.smsSent).length,
+    failed: items.filter((r) => !r.smsSent).length,
+    items,
+  });
 });
 
 // ============================================
-// TEST ENDPOINT - Tuma notification moja
+// TEST PUSH
 // ============================================
 app.post('/api/test-push', async (req, res) => {
-    const { phone } = req.body;
-    
-    if (!phone) {
-        return res.status(400).json({ error: 'Namba inahitajika' });
-    }
-
-    console.log(`🧪 Test notification kwa ${phone}`);
-
-    const subscription = await redis.get(`sub:${phone}`);
-    
-    if (!subscription) {
-        console.log(`❌ Hakuna subscription kwa ${phone}`);
-        return res.json({ 
-            success: false, 
-            error: 'Hakuna subscription. Fungua website na uweke odda kwanza.',
-            phone: phone
-        });
-    }
-
-    console.log(`✅ Subscription ipo kwa ${phone}`);
-
-    try {
-        const parsedSub = typeof subscription === 'string' ? JSON.parse(subscription) : subscription;
-
-        await webpush.sendNotification(parsedSub, JSON.stringify({
-            title: '🧪 Test Notification',
-            body: 'Hongera! Mfumo wako wa TBay unafanya kazi!',
-            icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png'
-        }));
-
-        console.log(`✅ Test notification imetumwa kwa ${phone}`);
-        res.json({ 
-            success: true, 
-            message: 'Test notification imetumwa!',
-            phone: phone
-        });
-    } catch (error) {
-        console.error('❌ Kosa la test notification:', error.statusCode, error.body || error.message);
-        res.json({ 
-            success: false, 
-            error: error.message,
-            statusCode: error.statusCode,
-            details: error.body || null
-        });
-    }
+  const phone = normalizePhone(req.body.phone);
+  if (!phone) return res.status(400).json({ error: 'Namba inahitajika' });
+  const r = await sendWebPush(phone, '🧪 Test Notification', 'Hongera! Mfumo wako wa TBay unafanya kazi!');
+  if (r.pushSent) return res.json({ success: true, message: 'Test notification imetumwa!', phone });
+  res.json({
+    success: false,
+    error: r.reason === 'no_subscription' ? 'Hakuna subscription. Fungua website na uweke odda kwanza.' : r.reason,
+    phone,
+  });
 });
 
-// ============================================
-// FUTA SUBSCRIPTIONS ZOTE (RESET)
-// ============================================
+// Futa subscriptions pekee (historia na foleni ya SMS zinabaki)
 app.post('/api/clear-subscriptions', async (req, res) => {
-    try {
-        await redis.flushdb();
-        console.log('🗑️ Subscriptions zote zimefutwa kwenye Redis');
-        res.json({ success: true, message: 'Subscriptions zote zimefutwa kikamilifu.' });
-    } catch (error) {
-        console.error('❌ Kosa la kufuta subscriptions:', error.message);
-        res.status(500).json({ success: false, error: error.message });
-    }
+  if (!checkSecret(req, res)) return;
+  try {
+    const phones = await redis.smembers(K.subs);
+    for (const p of phones) await redis.del(K.sub(p));
+    await redis.del(K.subs);
+    res.json({ success: true, message: `Subscriptions ${phones.length} zimefutwa.` });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// ============================================
-// ANZISHA SERVER
-// ============================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server inaendesha kwenye port ${PORT}`);
-    console.log(`📱 SMS: Beem`);
-    console.log(`🔔 Web Push: Enabled`);
-    console.log(`💾 Database: Upstash Redis`);
-});
+app.listen(PORT, () => console.log(`🚀 Server inaendesha kwenye port ${PORT}`));
