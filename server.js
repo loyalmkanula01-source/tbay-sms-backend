@@ -136,13 +136,13 @@ async function sendSms(phone, message) {
 // ============================================
 // WEB PUSH FUNCTION
 // ============================================
-async function sendWebPush(phone, title, body) {
+async function sendWebPush(phone, title, body, url) {
   try {
     const sub = parse(await redis.get(K.sub(phone)));
     if (!sub) return { pushSent: false, reason: 'no_subscription' };
     await webpush.sendNotification(
       sub,
-      JSON.stringify({ title, body, icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png' })
+      JSON.stringify({ title, body, url: url || '/', icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png' })
     );
     console.log(`✅ Web Push imetumwa kwa ${phone}`);
     return { pushSent: true };
@@ -172,6 +172,7 @@ function buildMessage(step, order) {
       sms: `Karibu TBay, ${jinaLako}!\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini - tunafurahi kukuhudumia!\n\nTBay Technologies`,
       title: '🛒 Odda Imepokelewa!',
       body: 'Hongera! Odda yako imepokelewa kikamilifu.',
+      url: '/?view=oda',
     };
   }
   if (step === 2) {
@@ -179,15 +180,17 @@ function buildMessage(step, order) {
       sms: `Habari ${jinaLako}!\n\nOda yako ya ${orderName} imesafirishwa. Itafika hivi karibuni.\n\nTunashukuru kwa kutumia TBay Technologies.\n\nKwa msaada WhatsApp: +255 750 910 821`,
       title: '🚚 Odda Imesafirishwa!',
       body: `Odda yako ya ${order.orderName} imesafirishwa.`,
+      url: '/?view=oda',
     };
   }
   if (step === 3) return {
-    sms: `Hongera ${jinaLako}!\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n-> tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Hongera ${jinaLako}!\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nKaribu tena! Tafadhali ingia kupitia link hii kupokea pesa zako:\n-> https://tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
     title: '🎉 Odda Imenunuliwa!',
     body: `Umelipwa TSh ${fmtTsh(completedTsh)}. Angalia akaunti yako.`,
+    url: '/?view=oda',
   };
   if (step === 4) return {
-    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n-> tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n-> https://tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
   };
   throw new Error('invalid_sms_step');
 }
@@ -219,7 +222,12 @@ async function runStep(orderId, step, attempt) {
 
   const sms = await sendSms(order.phone, msg.sms);
   // SMS 4 pekee; arifa za Web Push 1–3 hazibadilishwi.
-  const push = step === 4 ? { pushSent: false } : await sendWebPush(order.phone, msg.title, msg.body);
+  // Notification ya kila hatua inatumwa MARA MOJA tu, hata SMS ikirudiwa (retry).
+  const prev = order.sms && order.sms[step];
+  const alreadyPushed = !!(prev && prev.pushSent);
+  const push = step === 4 ? { pushSent: false }
+    : alreadyPushed ? { pushSent: true }
+    : await sendWebPush(order.phone, msg.title, msg.body, msg.url);
 
   order.sms[step] = {
     smsSent: sms.smsSent,
