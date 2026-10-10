@@ -169,7 +169,7 @@ function buildMessage(step, order) {
   const completedTsh = order.completedPayoutTsh ?? payoutTsh;
   if (step === 1) {
     return {
-      sms: `Karibu TBay, ${jinaLako}! 🎉\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini — tunafurahi kukuhudumia!\n\nTBay Technologies`,
+      sms: `Karibu TBay, ${jinaLako}!\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini - tunafurahi kukuhudumia!\n\nTBay Technologies`,
       title: '🛒 Odda Imepokelewa!',
       body: 'Hongera! Odda yako imepokelewa kikamilifu.',
     };
@@ -182,12 +182,12 @@ function buildMessage(step, order) {
     };
   }
   if (step === 3) return {
-    sms: `Hongera ${jinaLako}! 🎉\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n👉 tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Hongera ${jinaLako}!\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nChukua pesa zako kupitia link hii:\n-> tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
     title: '🎉 Odda Imenunuliwa!',
     body: `Umelipwa TSh ${fmtTsh(completedTsh)}. Angalia akaunti yako.`,
   };
   if (step === 4) return {
-    sms: `Karibu tena ${jinaLako}! 👋\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n👉 tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n-> tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
   };
   throw new Error('invalid_sms_step');
 }
