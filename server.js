@@ -190,7 +190,7 @@ function buildMessage(step, order) {
     url: '/?view=oda',
   };
   if (step === 4) return {
-    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa, ingia hapa:\n-> https://tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa pesa zako, ingia hapa kutoa pesa zako:\n-> https://tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
   };
   throw new Error('invalid_sms_step');
 }
