@@ -212,24 +212,35 @@ function toTsh(v) {
   return Math.max(0, parseInt(String(v ?? '').replace(/[^0-9]/g, ''), 10) || 0);
 }
 
+// Dakika 50: oda imenunuliwa — ongeza TSh Z kwenye Balance na Net Profit (MARA MOJA tu).
+// Inaitwa na cron (SMS 3) AU na website popup ya Hongera ikifunguka — yoyote itakayotangulia.
+async function creditCompleted(orderId, order) {
+  if (order.completedCredited) return false;
+  const lock = await redis.set(`credit:lock:${orderId}`, '1', { nx: true, ex: 30 });
+  if (!lock) return false;
+  try {
+    const fresh = parse(await redis.get(K.order(orderId))) || order;
+    if (fresh.completedCredited) { order.completedCredited = true; return false; }
+    const z = toTsh(fresh.completedPayoutTsh ?? fresh.payoutTsh);
+    const wp = fresh.walletPhone || fresh.phone;
+    if (z > 0) {
+      await redis.hincrby(K.wallet(wp), 'balance', z);
+      await redis.hincrby(K.wallet(wp), 'netProfit', z);
+    }
+    fresh.completedCredited = true;
+    order.completedCredited = true;
+    await redis.set(K.order(orderId), JSON.stringify({ ...order, completedCredited: true }));
+    console.log(`💰 +TSh ${z} kwa ${wp} (oda ${orderId} imenunuliwa)`);
+    return true;
+  } catch (e) { console.error('❌ Wallet (dakika 50):', e.message); return false; }
+  finally { await redis.del(`credit:lock:${orderId}`); }
+}
+
 async function runStep(orderId, step, attempt) {
   const order = parse(await redis.get(K.order(orderId)));
   if (!order) return { smsSent: false, error: 'order_not_found' };
   if (!cleanName(order.jinaLako)) order.jinaLako = await resolveCustomerName(order.phone);
-  // Dakika 50: oda imenunuliwa — ongeza TSh Z kwenye Balance na Net Profit (mara moja tu)
-  if (step === 3 && !order.completedCredited) {
-    const z = toTsh(order.completedPayoutTsh ?? order.payoutTsh);
-    const wp = order.walletPhone || order.phone;
-    try {
-      if (z > 0) {
-        await redis.hincrby(K.wallet(wp), 'balance', z);
-        await redis.hincrby(K.wallet(wp), 'netProfit', z);
-      }
-      order.completedCredited = true;
-      await redis.set(K.order(orderId), JSON.stringify(order));
-      console.log(`💰 +TSh ${z} kwa ${wp} (oda ${orderId} imenunuliwa)`);
-    } catch (e) { console.error('❌ Wallet (SMS 3):', e.message); }
-  }
+  if (step === 3) await creditCompleted(orderId, order);
   const msg = buildMessage(step, order);
 
   const sms = await sendSms(order.phone, msg.sms);
@@ -402,6 +413,19 @@ app.get('/api/wallet', async (req, res) => {
   if (!phone) return res.status(400).json({ error: 'Namba inahitajika' });
   try { res.json(await getWallet(phone)); }
   catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+// Website popup ya Hongera: hakikisha TSh Z imeongezwa (bila kuongeza mara mbili)
+app.post('/api/complete-order', async (req, res) => {
+  const orderId = String(req.body.orderId || '');
+  const order = parse(await redis.get(K.order(orderId)));
+  if (!order) return res.status(404).json({ error: 'Oda haipo' });
+  const elapsed = Date.now() - new Date(order.createdAt).getTime();
+  if (elapsed < SMS3_DELAY_MS - 60 * 1000) return res.status(409).json({ error: 'Bado dakika 50 hazijapita' });
+  try {
+    await creditCompleted(orderId, order);
+    res.json({ success: true, wallet: await getWallet(order.walletPhone || order.phone) });
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 // Hali ya oda moja (SMS 1/2/3/4 smsSent true/false)
