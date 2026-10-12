@@ -142,7 +142,8 @@ async function sendWebPush(phone, title, body, url) {
     if (!sub) return { pushSent: false, reason: 'no_subscription' };
     await webpush.sendNotification(
       sub,
-      JSON.stringify({ title, body, url: url || '/', icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png' })
+      JSON.stringify({ title, body, url: url || '/', icon: 'https://cdn-icons-png.flaticon.com/512/869/869636.png' }),
+      { TTL: 3600, urgency: 'high' }
     );
     console.log(`✅ Web Push imetumwa kwa ${phone}`);
     return { pushSent: true };
