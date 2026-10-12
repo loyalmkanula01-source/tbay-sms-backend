@@ -163,13 +163,25 @@ function fmtTsh(n) {
   return Number(n || 0).toLocaleString('en-US');
 }
 
+// Normalize the SMS greeting only; leave the stored customer profile unchanged.
+function smsCustomerName(value) {
+  let parts = cleanName(value).normalize('NFKD').replace(/[^\x20-\x7E]/g, '').replace(/[!]+/g, ' ').trim().split(/\s+/);
+  while (parts.length > 1 && parts.length % 2 === 0) {
+    const half = parts.length / 2;
+    if (parts.slice(0, half).join(' ').toLowerCase() !== parts.slice(half).join(' ').toLowerCase()) break;
+    parts = parts.slice(0, half);
+  }
+  return parts.join(' ') || 'Mteja';
+}
+const SMS_SUPPORT = 'Kwa msaada:\nWhatsApp: +255 750 910 821\nSMS za kawaida: +255 750 910 821';
+
 function buildMessage(step, order) {
-  const jinaLako = cleanName(order.jinaLako) || 'Mteja';
+  const jinaLako = smsCustomerName(order.jinaLako);
   const { orderName, payoutTsh } = order;
   const completedTsh = order.completedPayoutTsh ?? payoutTsh;
   if (step === 1) {
     return {
-      sms: `Karibu TBay, ${jinaLako}!\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini - tunafurahi kukuhudumia!\n\nTBay Technologies`,
+      sms: `Karibu TBay, ${jinaLako}!\n\nOda yako imepokelewa kikamilifu. Utaendelea kupokea taarifa kuhusu oda yako mpaka itakaponunuliwa.\n\nAsante kwa kutuamini - tunafurahi kukuhudumia!\n\nTBay Technologies\n\n${SMS_SUPPORT}`,
       title: '🛒 Odda Imepokelewa!',
       body: 'Hongera! Odda yako imepokelewa kikamilifu.',
       url: '/?view=oda',
@@ -177,20 +189,20 @@ function buildMessage(step, order) {
   }
   if (step === 2) {
     return {
-      sms: `Habari ${jinaLako}!\n\nOda yako ya ${orderName} imesafirishwa. Itafika hivi karibuni.\n\nTunashukuru kwa kutumia TBay Technologies.\n\nKwa msaada WhatsApp: +255 750 910 821`,
+      sms: `Habari ${jinaLako}!\n\nOda yako ya ${orderName} imesafirishwa. Itafika hivi karibuni.\n\nTunashukuru kwa kutumia TBay Technologies.\n\n${SMS_SUPPORT}`,
       title: '🚚 Odda Imesafirishwa!',
       body: `Odda yako ya ${order.orderName} imesafirishwa.`,
       url: '/?view=oda',
     };
   }
   if (step === 3) return {
-    sms: `Hongera ${jinaLako}!\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nKaribu tena! Tafadhali ingia kupitia link hii kupokea pesa zako:\n-> https://tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Hongera ${jinaLako}!\n\nOda yako imenunuliwa kikamilifu. Umelipwa TSh ${fmtTsh(completedTsh)} (asilimia 20 ya oda yako).\n\nKaribu tena! Tafadhali ingia kupitia link hii kupokea pesa zako:\n-> https://tbay.shop\n\nAsante kwa kufanya biashara na TBay Technologies!\n\n${SMS_SUPPORT}`,
     title: '🎉 Odda Imenunuliwa!',
     body: `Umelipwa TSh ${fmtTsh(completedTsh)}. Angalia akaunti yako.`,
     url: '/?view=oda',
   };
   if (step === 4) return {
-    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa pesa zako, ingia hapa kutoa pesa zako:\n-> https://tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada WhatsApp: +255 750 910 821`,
+    sms: `Karibu tena ${jinaLako}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa pesa zako, ingia hapa kutoa pesa zako:\n-> https://tbay.shop\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\n${SMS_SUPPORT}`,
   };
   throw new Error('invalid_sms_step');
 }
