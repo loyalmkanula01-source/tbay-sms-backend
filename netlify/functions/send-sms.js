@@ -55,7 +55,9 @@ exports.handler = async (event, context) => {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const dueJobs = await redis.zrangebyscore('sms:queue', 0, now, { limit: { offset: 0, count: 20 } });
+    
+    // HAPA NDIPO TULIPOBADILISHA: Tumetumia zrange badala ya zrangebyscore
+    const dueJobs = await redis.zrange('sms:queue', 0, now, { byScore: true, limit: { offset: 0, count: 20 } });
     
     for (const jobId of dueJobs) {
       const jobData = await redis.get(`sms:job:${jobId}`);
