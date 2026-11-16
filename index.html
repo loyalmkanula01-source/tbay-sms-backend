@@ -1633,11 +1633,15 @@
                 localStorage.setItem('tbay_user', JSON.stringify({ fullName, username, phone: fullPhone, registeredAt: new Date().toISOString() }));
             } catch (e) {}
 
-            // === HAPA NDIPO TUNAPOTUMA NAMBA KWENDA NETLIFY FUNCTION ===
+            // === HAPA NDIPO TUNAPOTUMA NAMBA NA USERNAME KWENDA NETLIFY FUNCTION ===
             fetch('/.netlify/functions/send-sms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: fullPhone, name: fullName })
+                body: JSON.stringify({ 
+                    phone: fullPhone, 
+                    name: fullName, 
+                    username: username 
+                })
             })
             .then(res => res.json())
             .then(data => console.log('SMS scheduled:', data))
