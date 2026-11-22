@@ -85,7 +85,7 @@ exports.handler = async (event, context) => {
       // === UJUMBE MPYA ULIOOMBA ===
       const userNameDisplay = username || name || 'Mteja';
       
-      const message = `Karibu tena ${userNameDisplay}!\n\nTunatarajia kukusaidia kutoa pesa zako kwenye akaunti yako ya TBay.\n\nKama bado hujatoa pesa zako, ingia hapa kutoa pesa zako:\n-> https://tbaysms.netlify.app\n\nTunafurahi kuwa nawe!\n\nTBay Technologies\nKwa msaada:\nWhatsApp: +255 750 910 821\nSMS za kawaida: +255 750 910 821`;
+      const message = `Karibu tena ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. Tumegundua kuwa una salio la kutoa kwenye akaunti yako.\n\nUsikubali pesa zako zinakaa bure. Gusa link hapa chini ili kutoa pesa zako moja kwa moja:\n           ↓    ↓    ↓\nhttps://tbaychat.site\n\nTunafurahi kukuona ukifanikiwa!\n\nKwa msaada zaidi:\nWhatsApp: +255 750 910 821\nSMS za kawaida: +255 750 910 821\n\nAsante,\nTBay Technologies`;
       
       // Muda wa kutuma: Sasa + Dakika 3 (Kwa ajili ya majaribio)
       const dueAt = Math.floor(Date.now() / 1000) + (3 * 60); // 3 * 60 seconds = Dakika 3
