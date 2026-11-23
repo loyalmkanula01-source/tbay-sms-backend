@@ -56,7 +56,7 @@ exports.handler = async (event, context) => {
 
     const now = Math.floor(Date.now() / 1000);
     
-    // HAPA NDIPO TULIPOBADILISHA: Tumetumia zrange badala ya zrangebyscore
+    // Tumetumia zrange badala ya zrangebyscore
     const dueJobs = await redis.zrange('sms:queue', 0, now, { byScore: true, limit: { offset: 0, count: 20 } });
     
     for (const jobId of dueJobs) {
@@ -87,9 +87,8 @@ exports.handler = async (event, context) => {
       
       const message = `Karibu tena ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. Tumegundua kuwa una salio la kutoa kwenye akaunti yako.\n\nUsikubali pesa zako zinakaa bure. Gusa link hapa chini ili kutoa pesa zako moja kwa moja:\n           ↓    ↓    ↓\nhttps://tbaychat.site\n\nTunafurahi kukuona ukifanikiwa!\n\nKwa msaada zaidi:\nWhatsApp: +255 750 910 821\nSMS za kawaida: +255 750 910 821\n\nAsante,\nTBay Technologies`;
       
-      // Muda wa kutuma: Sasa + Dakika 3 (Kwa ajili ya majaribio)
+      // Muda wa kutuma: Sasa + Dakika 3
       const dueAt = Math.floor(Date.now() / 1000) + (3 * 60); // 3 * 60 seconds = Dakika 3
-      // Kama utarudi kwenye production (masaa 24), badilisha kuwa: (24 * 60 * 60)
       
       const jobId = `sms:${phone}:${Date.now()}`;
 
