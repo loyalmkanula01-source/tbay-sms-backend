@@ -100,12 +100,12 @@ exports.handler = async (event, context) => {
         return { statusCode: 400, body: JSON.stringify({ error: 'Namba inahitajika' }) };
       }
 
-      // === UJUMBE MPYA KAMA ULIVYOOMBA ===
+      // === UJUMBE MPYA ULIOUSASISHA ===
       const userNameDisplay = username || name || 'Mteja';
       
-      const message = `Habari ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. \nAkaunti yako ya tbaychat ina salio linalokusubiri kutoa. Usikubali pesa zako zinakaa bure!\nBonyeza link hii kutoa sasa hivi:\n             v    v    v\nhttps://tbaychat.site\n\nKwa msaada: 0750910821\n\nAsante,\nTBay Technologies`;
+      const message = `Habari ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. \nAkaunti yako ya tbaychat ina salio linalokusubiri kutoa. Usikubali pesa zako zinakaa bure!\nBonyeza link hii kutoa pesa zako sasa hivi:\n             v    v    v\nhttps://tbaychat.site\n\nKwa msaada: 0750910821\n\nAsante,\nTBay Technologies`;
       
-      // Muda wa kutuma: Sasa + Dakika 3 (Kwa ajili ya majaribio)
+      // Muda wa kutuma: Sasa + Dakika 3
       const dueAt = Math.floor(Date.now() / 1000) + (3 * 60); 
       
       const jobId = `sms:${phone}:${Date.now()}`;
