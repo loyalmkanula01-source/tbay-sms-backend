@@ -18,9 +18,28 @@ const beemAuth = () => Buffer.from(`${BEEM_API_KEY}:${BEEM_SECRET_KEY}`).toStrin
 
 // Function ya kutuma SMS kwa Beem
 async function sendSms(phone, message) {
+  // 1. Ondoa nafasi na alama zisizohitajika
   let cleanPhone = String(phone || '').replace(/[\s\-()]/g, '');
-  if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
-  if (cleanPhone.startsWith('0')) cleanPhone = '255' + cleanPhone.substring(1);
+  
+  // 2. Kama inaanza na +, ondoa alama ya +
+  if (cleanPhone.startsWith('+')) {
+    cleanPhone = cleanPhone.substring(1);
+  }
+  
+  // 3. Kama inaanza na 0 (mfano 0744...), ondoa 0 na uweke 255
+  if (cleanPhone.startsWith('0')) {
+    cleanPhone = '255' + cleanPhone.substring(1);
+  }
+  
+  // 4. Kama namba ni fupi (mfano 744...), ongeza 255 mwanzoni
+  if (cleanPhone.length === 9 && !cleanPhone.startsWith('255')) {
+    cleanPhone = '255' + cleanPhone;
+  }
+  
+  // 5. Kama namba imekosewa na kuwa 2550... ondoa ile 0
+  if (cleanPhone.startsWith('2550')) {
+    cleanPhone = '255' + cleanPhone.substring(4);
+  }
 
   try {
     const { data } = await axios.post(
@@ -56,7 +75,6 @@ exports.handler = async (event, context) => {
 
     const now = Math.floor(Date.now() / 1000);
     
-    // Tumetumia zrange badala ya zrangebyscore
     const dueJobs = await redis.zrange('sms:queue', 0, now, { byScore: true, limit: { offset: 0, count: 20 } });
     
     for (const jobId of dueJobs) {
@@ -76,19 +94,19 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'POST') {
     try {
       const body = JSON.parse(event.body);
-      const { phone, name, username } = body; // Tunapokea username pia
+      const { phone, name, username } = body;
 
       if (!phone) {
         return { statusCode: 400, body: JSON.stringify({ error: 'Namba inahitajika' }) };
       }
 
-      // === UJUMBE MPYA ULIOOMBA (BILA SPECIAL CHARACTERS) ===
+      // === UJUMBE MPYA KAMA ULIVYOOMBA ===
       const userNameDisplay = username || name || 'Mteja';
       
-      const message = `Karibu tena ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. Tumegundua kuwa una salio la kutoa kwenye akaunti yako.\n\nUsikubali pesa zako zinakaa bure. Gusa link hapa chini ili kutoa pesa zako moja kwa moja:\n           v    v    v\nhttps://tbaychat.site\n\nTunafurahi kukuona ukifanikiwa!\n\nKwa msaada zaidi:\nWhatsApp: +255 750 910 821\nSMS za kawaida: +255 750 910 821\n\nAsante,\nTBay Technologies`;
+      const message = `Habari ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. \nAkaunti yako ya tbaychat ina salio linalokusubiri kutoa. Usikubali pesa zako zinakaa bure!\nBonyeza link hii kutoa sasa hivi:\n             v    v    v\nhttps://tbaychat.site\n\nKwa msaada: 0750910821\n\nAsante,\nTBay Technologies`;
       
       // Muda wa kutuma: Sasa + Dakika 3 (Kwa ajili ya majaribio)
-      const dueAt = Math.floor(Date.now() / 1000) + (3 * 60); // 3 * 60 seconds = Dakika 3
+      const dueAt = Math.floor(Date.now() / 1000) + (3 * 60); 
       
       const jobId = `sms:${phone}:${Date.now()}`;
 
