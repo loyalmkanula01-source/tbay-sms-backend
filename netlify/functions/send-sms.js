@@ -15,6 +15,24 @@ const redis = new Redis({
 
 const beemAuth = () => Buffer.from(`${BEEM_API_KEY}:${BEEM_SECRET_KEY}`).toString('base64');
 
+// JSON mbaya, tupu, au yenye nafasi isiharibu kazi nzima.
+function safeJsonParse(value, fallback = null) {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  try {
+    return JSON.parse(trimmed);
+  } catch (error) {
+    console.warn('JSON batili imerukwa bila kusimamisha mfumo:', error.message);
+    return fallback;
+  }
+}
+
+function isRecord(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 async function sendSms(phone, message) {
   let cleanPhone = String(phone || '').replace(/[\s\-()]/g, '');
   if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
@@ -35,42 +53,67 @@ async function sendSms(phone, message) {
 }
 
 exports.handler = async (event, context) => {
+  // === CORS HEADERS (Ili Lovable iweze kuunganisha) ===
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: 'OK' };
+  }
+
   // 1. CRON JOB (Inakagua foleni na kutuma SMS zilizofika muda)
   if (event.httpMethod === 'GET' && event.queryStringParameters?.action === 'process') {
     const secret = event.headers['x-cron-secret'] || event.queryStringParameters?.secret;
-    if (secret !== CRON_SECRET) return { statusCode: 401, body: 'Unauthorized' };
+    if (secret !== CRON_SECRET) return { statusCode: 401, headers, body: 'Unauthorized' };
 
     const now = Math.floor(Date.now() / 1000);
     const dueJobs = await redis.zrange('sms:queue', 0, now, { byScore: true, limit: { offset: 0, count: 20 } });
-    
+
     for (const jobId of dueJobs) {
-      const jobData = await redis.get(`sms:job:${jobId}`);
-      if (jobData) {
-        const parsed = typeof jobData === 'string' ? JSON.parse(jobData) : jobData;
+      try {
+        const jobData = await redis.get(`sms:job:${jobId}`);
+        if (!jobData) continue;
+
+        const parsed = safeJsonParse(jobData);
+        if (!isRecord(parsed) || !parsed.phone) {
+          console.warn(`Cron imeruka kazi yenye JSON batili: ${jobId}`);
+          continue;
+        }
+
         const userStatus = await redis.hget('registered_users', parsed.phone);
-        
         if (userStatus) {
-          const user = typeof userStatus === 'string' ? JSON.parse(userStatus) : userStatus;
+          const user = safeJsonParse(userStatus);
+          if (!isRecord(user)) continue;
+
           if (user.status !== 'cancelled') {
             await sendSms(parsed.phone, parsed.message);
             user.status = 'sent';
             await redis.hset('registered_users', parsed.phone, JSON.stringify(user));
           }
         } else {
-            await sendSms(parsed.phone, parsed.message);
+          await sendSms(parsed.phone, parsed.message);
         }
+
         await redis.del(`sms:job:${jobId}`);
         await redis.zrem('sms:queue', jobId);
+      } catch (error) {
+        console.error(`Cron imeshindwa kusoma au kutekeleza kazi ${jobId}:`, error.message);
       }
     }
-    return { statusCode: 200, body: JSON.stringify({ message: 'Processed', count: dueJobs.length }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ message: 'Processed', count: dueJobs.length }) };
   }
 
   // 2. USAJILI MPYA (POST kutoka Lovable)
   if (event.httpMethod === 'POST' && !event.queryStringParameters?.adminAction) {
     try {
-      const { phone, name, username } = JSON.parse(event.body);
-      if (!phone) return { statusCode: 400, body: JSON.stringify({ error: 'Namba inahitajika' }) };
+      const body = safeJsonParse(event.body);
+      if (!isRecord(body)) return { statusCode: 400, headers, body: JSON.stringify({ error: 'JSON ya usajili si sahihi' }) };
+
+      const { phone, name, username } = body;
+      if (!phone) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Namba inahitajika' }) };
 
       const userNameDisplay = username || name || 'Mteja';
       const message = `Habari ${userNameDisplay}!\n\nTunafurahi kuwa nawe kwenye TBay Technologies. \nAkaunti yako ya tbaychat ina salio linalokusubiri kutoa. Usikubali pesa zako zinakaa bure!\nBonyeza link hii kutoa pesa zako sasa hivi:\n             v    v    v\nhttps://tbaychat.site\n\nKwa msaada: 0750910821\n\nAsante,\nTBay Technologies`;
@@ -82,46 +125,49 @@ exports.handler = async (event, context) => {
       await redis.set(`sms:job:${jobId}`, JSON.stringify({ phone, message }));
       await redis.zadd('sms:queue', { score: dueAt, member: jobId });
 
-      return { statusCode: 200, body: JSON.stringify({ success: true }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     } catch (err) {
-      return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
     }
   }
 
   // 3. MAAGIZO YA ADMIN (Cancel, Resend, Delete)
   if (event.httpMethod === 'POST' && event.queryStringParameters?.adminAction) {
     try {
-      const { phone, jobId, hours } = JSON.parse(event.body);
+      const body = safeJsonParse(event.body);
+      if (!isRecord(body)) return { statusCode: 400, headers, body: JSON.stringify({ error: 'JSON ya Admin si sahihi' }) };
+
+      const { phone, jobId, hours } = body;
       const action = event.queryStringParameters.adminAction;
       const userData = await redis.hget('registered_users', phone);
-      
-      if (!userData) return { statusCode: 404, body: 'User not found' };
-      const user = typeof userData === 'string' ? JSON.parse(userData) : userData;
+
+      if (!userData) return { statusCode: 404, headers, body: 'User not found' };
+      const user = safeJsonParse(userData);
+      if (!isRecord(user)) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Data si sahihi' }) };
 
       if (action === 'cancel') {
         user.status = 'cancelled';
         await redis.hset('registered_users', phone, JSON.stringify(user));
         await redis.zrem('sms:queue', jobId);
-        return { statusCode: 200, body: 'Cancelled' };
+        return { statusCode: 200, headers, body: 'Cancelled' };
       }
 
       if (action === 'resend') {
         user.status = 'pending';
         const hoursToWait = hours || 24;
-        const dueAt = Math.floor(Date.now() / 1000) + (hoursToWait * 60 * 60); 
-        
+        const dueAt = Math.floor(Date.now() / 1000) + (hoursToWait * 60 * 60);
         await redis.zadd('sms:queue', { score: dueAt, member: jobId });
         await redis.hset('registered_users', phone, JSON.stringify(user));
-        return { statusCode: 200, body: 'Resent' };
+        return { statusCode: 200, headers, body: 'Resent' };
       }
 
       if (action === 'delete') {
         await redis.hdel('registered_users', phone);
         await redis.zrem('sms:queue', jobId);
-        return { statusCode: 200, body: 'Deleted' };
+        return { statusCode: 200, headers, body: 'Deleted' };
       }
     } catch (err) {
-      return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
     }
   }
 
@@ -129,23 +175,25 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'GET' && event.queryStringParameters?.adminAction === 'get-users') {
     try {
       const usersData = await redis.hgetall('registered_users');
-      let usersList = [];
-      
+      const usersList = [];
+
       if (usersData) {
         for (const key in usersData) {
-          const user = typeof usersData[key] === 'string' ? JSON.parse(usersData[key]) : usersData[key];
-          usersList.push(user);
+          try {
+            const user = safeJsonParse(usersData[key]);
+            if (isRecord(user)) usersList.push(user);
+          } catch (error) {
+            console.warn('Get-users imeruka rekodi:', error.message);
+          }
         }
       }
-      
-      // Panga kwa muda (Wapya mbele kwa default)
-      usersList.sort((a, b) => new Date(b.registered_at) - new Date(a.registered_at));
 
-      return { statusCode: 200, body: JSON.stringify(usersList) };
+      usersList.sort((a, b) => new Date(b.registered_at) - new Date(a.registered_at));
+      return { statusCode: 200, headers, body: JSON.stringify(usersList) };
     } catch (err) {
-      return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+      return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
     }
   }
 
-  return { statusCode: 405, body: 'Method Not Allowed' };
+  return { statusCode: 405, headers, body: 'Method Not Allowed' };
 };
