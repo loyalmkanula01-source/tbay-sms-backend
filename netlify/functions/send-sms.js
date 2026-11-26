@@ -34,11 +34,17 @@ function isRecord(value) {
 }
 
 async function sendSms(phone, message) {
+  // === USafi WA NAMBA ZOTE ===
   let cleanPhone = String(phone || '').replace(/[\s\-()]/g, '');
   if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
   if (cleanPhone.startsWith('0')) cleanPhone = '255' + cleanPhone.substring(1);
   if (cleanPhone.length === 9 && !cleanPhone.startsWith('255')) cleanPhone = '255' + cleanPhone;
-  if (cleanPhone.startsWith('2550')) cleanPhone = '255' + cleanPhone.substring(4);
+  
+  // Kama namba imekosewa na kuwa 2550... ondoa ile 0
+  if (cleanPhone.startsWith('2550')) {
+    cleanPhone = '255' + cleanPhone.substring(4);
+  }
+  // ============================
 
   try {
     const { data } = await axios.post(
@@ -53,7 +59,7 @@ async function sendSms(phone, message) {
 }
 
 exports.handler = async (event, context) => {
-  // === CORS HEADERS (Ili Lovable iweze kuunganisha) ===
+  // === CORS HEADERS ===
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -121,7 +127,6 @@ exports.handler = async (event, context) => {
       const dueAt = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // Masaa 24
       const jobId = `sms:${phone}:${Date.now()}`;
 
-      // Upstash inahitaji object { field: value }; bila hivyo data haihifadhiwi kwa namba ya simu.
       await redis.hset('registered_users', { [phone]: JSON.stringify({ phone, name, username, registered_at: new Date().toISOString(), status: 'pending', jobId }) });
       await redis.set(`sms:job:${jobId}`, JSON.stringify({ phone, message }));
       await redis.zadd('sms:queue', { score: dueAt, member: jobId });
