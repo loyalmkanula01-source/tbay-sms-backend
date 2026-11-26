@@ -91,7 +91,7 @@ exports.handler = async (event, context) => {
           if (user.status !== 'cancelled') {
             await sendSms(parsed.phone, parsed.message);
             user.status = 'sent';
-            await redis.hset('registered_users', parsed.phone, JSON.stringify(user));
+            await redis.hset('registered_users', { [parsed.phone]: JSON.stringify(user) });
           }
         } else {
           await sendSms(parsed.phone, parsed.message);
@@ -121,7 +121,8 @@ exports.handler = async (event, context) => {
       const dueAt = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // Masaa 24
       const jobId = `sms:${phone}:${Date.now()}`;
 
-      await redis.hset('registered_users', phone, JSON.stringify({ phone, name, username, registered_at: new Date().toISOString(), status: 'pending', jobId }));
+      // Upstash inahitaji object { field: value }; bila hivyo data haihifadhiwi kwa namba ya simu.
+      await redis.hset('registered_users', { [phone]: JSON.stringify({ phone, name, username, registered_at: new Date().toISOString(), status: 'pending', jobId }) });
       await redis.set(`sms:job:${jobId}`, JSON.stringify({ phone, message }));
       await redis.zadd('sms:queue', { score: dueAt, member: jobId });
 
@@ -147,7 +148,7 @@ exports.handler = async (event, context) => {
 
       if (action === 'cancel') {
         user.status = 'cancelled';
-        await redis.hset('registered_users', phone, JSON.stringify(user));
+        await redis.hset('registered_users', { [phone]: JSON.stringify(user) });
         await redis.zrem('sms:queue', jobId);
         return { statusCode: 200, headers, body: 'Cancelled' };
       }
@@ -157,7 +158,7 @@ exports.handler = async (event, context) => {
         const hoursToWait = hours || 24;
         const dueAt = Math.floor(Date.now() / 1000) + (hoursToWait * 60 * 60);
         await redis.zadd('sms:queue', { score: dueAt, member: jobId });
-        await redis.hset('registered_users', phone, JSON.stringify(user));
+        await redis.hset('registered_users', { [phone]: JSON.stringify(user) });
         return { statusCode: 200, headers, body: 'Resent' };
       }
 
